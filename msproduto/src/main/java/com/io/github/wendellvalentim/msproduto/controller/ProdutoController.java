@@ -9,9 +9,11 @@ import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.service.ProdutoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.UUID;
 
@@ -49,5 +51,22 @@ public class ProdutoController implements GenericController {
     public ResponseEntity<Void> deletar(@PathVariable("id") UUID id) {
         produtoService.deletar(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProdutoResponseDTO>> pesquisa(@RequestParam(value = "nome", required = false)
+                                                             String nome,
+                                                             @RequestParam(value = "preco", required = false)
+                                                             BigDecimal preco,
+                                                             @RequestParam(value = "cod_prod", required = false)
+                                                             String cod,
+                                                             @RequestParam(value = "pagina", defaultValue = "0")
+                                                             Integer pagina,
+                                                             @RequestParam(value = "tamanho-pagina", defaultValue = "10")
+                                                             Integer tamanhoPagina) {
+        Page<Produto> paginaRequest = produtoService.pesquisar(nome, cod, preco, pagina, tamanhoPagina);
+        Page<ProdutoResponseDTO> resultado = paginaRequest.map(mapper::toDTO);
+
+        return ResponseEntity.ok(resultado);
     }
 }

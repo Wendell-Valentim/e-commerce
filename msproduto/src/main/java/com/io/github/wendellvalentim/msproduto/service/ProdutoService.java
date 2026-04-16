@@ -7,9 +7,19 @@ import com.io.github.wendellvalentim.msproduto.mappers.ProdutoMapper;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.UUID;
+
+import static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.nomeProdutoEqual;
+import  static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.codProdutoEqual;
+import  static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.precoProduto;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +53,25 @@ public class ProdutoService {
         produtoRepository.delete(produto);
     }
 
+    public Page<Produto> pesquisar (String nome, String cod_prod, BigDecimal preco, Integer pagina, Integer tamanhoPagina) {
+        Specification<Produto> specs = Specification.
+                where((root, query, cb) ->  cb.conjunction());
 
+        if(StringUtils.hasText(nome)) {
+            specs = specs.and(nomeProdutoEqual(nome));
+        }
+
+        if(StringUtils.hasText(cod_prod)) {
+            specs = specs.and(codProdutoEqual(cod_prod));
+        }
+
+        if(preco != null) {
+            specs = specs.and(precoProduto(preco));
+        }
+
+        Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);
+
+        return produtoRepository.findAll(specs, pageRequest);
+    }
 
 }
