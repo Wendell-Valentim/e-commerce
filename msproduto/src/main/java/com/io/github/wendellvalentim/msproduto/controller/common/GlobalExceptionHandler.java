@@ -2,6 +2,8 @@ package com.io.github.wendellvalentim.msproduto.controller.common;
 
 import com.io.github.wendellvalentim.msproduto.controller.dto.ErroCampo;
 import com.io.github.wendellvalentim.msproduto.controller.dto.ErroResponse;
+import com.io.github.wendellvalentim.msproduto.exceptions.CodProdExists;
+import com.io.github.wendellvalentim.msproduto.exceptions.EstoqueInsuficienteException;
 import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -24,6 +26,20 @@ public class GlobalExceptionHandler {
                 .toList();
         return new ErroResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de validação!", listErros);
     }
+
+    @ExceptionHandler(CodProdExists.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResponse handleCodProdExists (CodProdExists e) {
+        return  new ErroResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(EstoqueInsuficienteException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResponse handleCEstoqueInsuficienteException(EstoqueInsuficienteException e) {
+        return  new ErroResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of());
+    }
+
+
 
     @ExceptionHandler(ProdutoNaoEncontradoException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

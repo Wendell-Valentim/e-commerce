@@ -21,7 +21,7 @@ public record ProdutoCreatedDTO (
                                  int quantidade,
 
                                  @NotNull
-                                 String cod_prod,
+                                 String codProduto,
 
                                  @NotNull(message = "O Status deve conter DISPONIVEL OU INDISPONIVEL!")
                                  Status status){

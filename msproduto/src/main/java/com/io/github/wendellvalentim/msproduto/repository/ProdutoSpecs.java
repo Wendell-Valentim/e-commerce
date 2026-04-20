@@ -12,7 +12,7 @@ public class ProdutoSpecs {
     }
 
     public static Specification<Produto> codProdutoEqual(String cod_prod) {
-        return (root, query, cb) -> cb.equal(root.get("cod_prod"), cod_prod);
+        return (root, query, cb) -> cb.equal(root.get("codProduto"), cod_prod);
     }
 
     public static Specification<Produto> precoProduto(BigDecimal preco) {

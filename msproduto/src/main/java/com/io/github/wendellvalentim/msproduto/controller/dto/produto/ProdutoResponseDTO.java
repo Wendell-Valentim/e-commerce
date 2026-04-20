@@ -14,5 +14,5 @@ public record ProdutoResponseDTO (
 
                                   Status status,
 
-                                  String cod_prod){
+                                  String codProduto){
 }

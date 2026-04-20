@@ -33,7 +33,7 @@ public class Produto {
     private Integer quantidade;
 
     @Column(unique = true, nullable = false)
-    private String cod_prod;
+    private String codProduto;
 
     @Enumerated(EnumType.STRING)
     private Status status;

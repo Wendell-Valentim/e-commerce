@@ -1,8 +1,6 @@
 package com.io.github.wendellvalentim.msproduto.mappers;
 
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoCreatedDTO;
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoUpdateDTO;
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoResponseDTO;
+import com.io.github.wendellvalentim.msproduto.controller.dto.produto.*;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -18,5 +16,10 @@ public interface ProdutoMapper {
     Produto toEntity(ProdutoCreatedDTO dto);
 
     ProdutoResponseDTO toDTO(Produto produto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Produto estoqueToEntity(EstoqueUpdateDTO dto);
+
+    EstoqueResponseDTO estoqueToDTO(Produto produto);
 }
 

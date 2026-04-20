@@ -1,12 +1,14 @@
 package com.io.github.wendellvalentim.msproduto.controller;
 
 import com.io.github.wendellvalentim.msproduto.controller.common.generic.GenericController;
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoCreatedDTO;
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoUpdateDTO;
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoResponseDTO;
+import com.io.github.wendellvalentim.msproduto.controller.dto.produto.*;
 import com.io.github.wendellvalentim.msproduto.mappers.ProdutoMapper;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.service.ProdutoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,12 +22,20 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/produtos")
 @RequiredArgsConstructor
+@Tag(name = "Produtos")
 public class ProdutoController implements GenericController {
 
     private final ProdutoService produtoService;
     private final ProdutoMapper mapper;
 
+
     @PostMapping
+    @Operation(summary = "Salvar", description = "Cadastrar novo produto!")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
+            @ApiResponse(responseCode = "422", description = "Erro de validação!"),
+            @ApiResponse(responseCode = "400", description = "Codigo de produto ja Cadastrado!")
+    })
     public ResponseEntity<Void> salvar (@Valid @RequestBody ProdutoCreatedDTO request) {
         Produto produto = produtoService.salvar(request);
         URI location = gerarHeaderLocation(produto.getId());
@@ -58,7 +68,7 @@ public class ProdutoController implements GenericController {
                                                              String nome,
                                                              @RequestParam(value = "preco", required = false)
                                                              BigDecimal preco,
-                                                             @RequestParam(value = "cod_prod", required = false)
+                                                             @RequestParam(value = "codProduto", required = false)
                                                              String cod,
                                                              @RequestParam(value = "pagina", defaultValue = "0")
                                                              Integer pagina,
@@ -68,5 +78,18 @@ public class ProdutoController implements GenericController {
         Page<ProdutoResponseDTO> resultado = paginaRequest.map(mapper::toDTO);
 
         return ResponseEntity.ok(resultado);
+    }
+
+    @PatchMapping("/diminuir/{id}")
+    public ResponseEntity<EstoqueResponseDTO> diminuirEstoque
+            (       @PathVariable(name = "id",required = true) UUID id,
+                    @Valid @RequestBody EstoqueUpdateDTO request
+    ) {
+
+        Produto produto = produtoService.baixarEstoquePorPedido(id, mapper.estoqueToEntity(request));
+        EstoqueResponseDTO resultado = mapper.estoqueToDTO(produto);
+
+        return ResponseEntity.ok(resultado);
+
     }
 }

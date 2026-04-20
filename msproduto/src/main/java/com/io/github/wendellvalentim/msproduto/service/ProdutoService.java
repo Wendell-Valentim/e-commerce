@@ -1,11 +1,15 @@
 package com.io.github.wendellvalentim.msproduto.service;
 
+import com.io.github.wendellvalentim.msproduto.controller.dto.produto.EstoqueUpdateDTO;
 import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoCreatedDTO;
 import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoUpdateDTO;
+import com.io.github.wendellvalentim.msproduto.exceptions.EstoqueInsuficienteException;
 import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
 import com.io.github.wendellvalentim.msproduto.mappers.ProdutoMapper;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.repository.ProdutoRepository;
+import com.io.github.wendellvalentim.msproduto.validators.ProdutoValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,9 +31,11 @@ public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
     private final ProdutoMapper produtoMapper;
+    private final ProdutoValidator validator;
 
+    @Transactional
     public Produto salvar(ProdutoCreatedDTO dto) {
-
+        validator.validar(produtoMapper.toEntity(dto));
         return produtoRepository.save(produtoMapper.toEntity(dto));
     }
 
@@ -39,9 +45,10 @@ public class ProdutoService {
     }
 
 
+    @Transactional
     public Produto atualizar(UUID id, ProdutoUpdateDTO dto) {
         Produto produto = buscar(id);
-
+        validator.validar(produto);
         produtoMapper.updateToEntity(dto, produto);
 
         return produtoRepository.save(produto);
@@ -72,6 +79,18 @@ public class ProdutoService {
         Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);
 
         return produtoRepository.findAll(specs, pageRequest);
+    }
+
+    @Transactional
+    public Produto baixarEstoquePorPedido(UUID id, Produto request) {
+        Produto produto = buscar(id);
+
+        if(produto.getQuantidade() < request.getQuantidade()) {
+            throw new EstoqueInsuficienteException("Estoque indisponivel!");
+        }
+
+        produto.setQuantidade(produto.getQuantidade() - request.getQuantidade());
+        return produtoRepository.save(produto);
     }
 
 }
