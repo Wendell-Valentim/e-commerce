@@ -2,6 +2,7 @@ package com.io.github.wendellvalentim.msproduto.model;
 
 import com.io.github.wendellvalentim.msproduto.Status;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,6 +15,8 @@ import java.util.UUID;
 @Data
 @Table(name = "tb_produtos")
 @EntityListeners(AuditingEntityListener.class)
+
+
 public class Produto {
 
     @Id

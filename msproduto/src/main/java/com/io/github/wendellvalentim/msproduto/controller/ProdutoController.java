@@ -92,4 +92,16 @@ public class ProdutoController implements GenericController {
         return ResponseEntity.ok(resultado);
 
     }
+
+    @PatchMapping("/aumentar/{id}")
+    public ResponseEntity<EstoqueResponseDTO> aumentarEstoque (
+            @PathVariable(name = "id", required = true) UUID id,
+            @Valid @RequestBody EstoqueUpdateDTO request
+    ) {
+        Produto produto = produtoService.aumentarEstoque(id, mapper.estoqueToEntity(request));
+        EstoqueResponseDTO resultado = mapper.estoqueToDTO(produto);
+
+        return ResponseEntity.ok(resultado);
+
+    }
 }

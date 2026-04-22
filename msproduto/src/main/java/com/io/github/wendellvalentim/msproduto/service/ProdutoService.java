@@ -35,8 +35,9 @@ public class ProdutoService {
 
     @Transactional
     public Produto salvar(ProdutoCreatedDTO dto) {
-        validator.validar(produtoMapper.toEntity(dto));
-        return produtoRepository.save(produtoMapper.toEntity(dto));
+        Produto produto = produtoMapper.toEntity(dto);
+        validator.validar(produto);
+        return produtoRepository.save(produto);
     }
 
     public Produto buscar(UUID id) {
@@ -91,6 +92,15 @@ public class ProdutoService {
 
         produto.setQuantidade(produto.getQuantidade() - request.getQuantidade());
         return produtoRepository.save(produto);
+    }
+
+    @Transactional
+    public Produto aumentarEstoque(UUID id, Produto request) {
+        Produto produto = buscar(id);
+
+        produto.setQuantidade(produto.getQuantidade() + request.getQuantidade());
+
+        return  produtoRepository.save(produto);
     }
 
 }
