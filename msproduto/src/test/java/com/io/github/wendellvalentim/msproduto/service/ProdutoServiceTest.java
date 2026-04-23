@@ -4,11 +4,14 @@ package com.io.github.wendellvalentim.msproduto.service;
 import com.io.github.wendellvalentim.msproduto.Status;
 import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoCreatedDTO;
 import com.io.github.wendellvalentim.msproduto.exceptions.CodProdExists;
+import com.io.github.wendellvalentim.msproduto.exceptions.EstoqueInsuficienteException;
+import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
 import com.io.github.wendellvalentim.msproduto.mappers.ProdutoMapper;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.repository.ProdutoRepository;
 import com.io.github.wendellvalentim.msproduto.validators.ProdutoValidator;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.math.estimation.EstimationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +56,7 @@ import static org.mockito.Mockito.*;
         produto.setNome("Nome do Produto");
         produto.setPreco(new BigDecimal(3000));
         produto.setCodProduto("COD123");
+
     }
 
     @Test
@@ -96,5 +100,63 @@ import static org.mockito.Mockito.*;
         assertThat(produtoEncontrado).isEqualTo(produto);
 
         verify(repository).findById(produto.getId());
+    }
+
+    @Test
+    void deveDarErroAoRetornarUmProdutoQueNaoExiste() {
+        when(repository.findById(produto.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ProdutoNaoEncontradoException.class, () -> {
+            service.buscar(produto.getId());
+        });
+    }
+
+    @Test
+    void deveDeletarUmProdutoAPartirDoId() {
+        when(repository.findById(produto.getId())).thenReturn(Optional.of(produto));
+
+        service.deletar(produto.getId());
+
+        verify(repository, times(1)).delete(produto);
+    }
+
+    @Test
+    void deveDarErroAoTentarDeletarUmProdutoPorId() {
+        when(repository.findById(produto.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ProdutoNaoEncontradoException.class, () -> {
+            service.deletar(produto.getId());
+        });
+
+        verify(repository, never()).delete(produto);
+    }
+
+    @Test
+    void deveDiminuirAQuantidadeEmEstoque() {
+        produto.setQuantidade(10);
+        when(repository.findById(produto.getId())).thenReturn(Optional.of(produto));
+
+        Produto pedido = new Produto();
+        pedido.setQuantidade(3);
+
+        service.baixarEstoquePorPedido(produto.getId(), pedido);
+
+        assertEquals(7, produto.getQuantidade());
+
+        verify(repository).save(produto);
+    }
+
+    @Test
+    void deveDarErroAoDiminuirEstoque() {
+        produto.setQuantidade(10);
+        when(repository.findById(produto.getId())).thenReturn(Optional.of(produto));
+
+        Produto pedido = new Produto();
+        pedido.setQuantidade(11);
+
+        assertThrows(EstoqueInsuficienteException.class, () -> {
+            service.baixarEstoquePorPedido(produto.getId(), pedido);
+        });
+        verify(repository, never()).save(produto);
     }
 }
