@@ -1,10 +1,10 @@
 package com.io.github.wendellvalentim.msproduto.service;
 
-import com.io.github.wendellvalentim.msproduto.controller.dto.produto.EstoqueUpdateDTO;
 import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoCreatedDTO;
 import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoUpdateDTO;
 import com.io.github.wendellvalentim.msproduto.exceptions.EstoqueInsuficienteException;
 import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
+import com.io.github.wendellvalentim.msproduto.exceptions.ValorNegativoException;
 import com.io.github.wendellvalentim.msproduto.mappers.ProdutoMapper;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.repository.ProdutoRepository;
@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.nomeProdutoEqual;
+import static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.nomeProdutoLike;
 import  static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.codProdutoEqual;
 import  static com.io.github.wendellvalentim.msproduto.repository.ProdutoSpecs.precoProduto;
 
@@ -66,7 +66,7 @@ public class ProdutoService {
                 where((root, query, cb) ->  cb.conjunction());
 
         if(StringUtils.hasText(nome)) {
-            specs = specs.and(nomeProdutoEqual(nome));
+            specs = specs.and(nomeProdutoLike(nome));
         }
 
         if(StringUtils.hasText(cod_prod)) {
@@ -96,8 +96,10 @@ public class ProdutoService {
 
     @Transactional
     public Produto aumentarEstoque(UUID id, Produto request) {
+        if( request.getQuantidade() <= 0 || request.getQuantidade() == null) {
+            throw new ValorNegativoException("O valor não pode ser menor ou igual a zero!");
+        }
         Produto produto = buscar(id);
-
         produto.setQuantidade(produto.getQuantidade() + request.getQuantidade());
 
         return  produtoRepository.save(produto);

@@ -18,3 +18,5 @@ eureka:
       defaultZone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+springdoc:
+  override-with-generic-response: false

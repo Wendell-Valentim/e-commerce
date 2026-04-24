@@ -7,8 +7,9 @@ import java.math.BigDecimal;
 
 public class ProdutoSpecs {
 
-    public static Specification<Produto> nomeProdutoEqual(String nome) {
-        return ((root, query, cb) -> cb.equal(root.get("nome"), nome));
+    public static Specification<Produto> nomeProdutoLike(String nome) {
+        return ((root, query, cb) -> cb.like(cb.upper(root.get("nome")),
+                "%" + nome.toUpperCase() + "%"));
     }
 
     public static Specification<Produto> codProdutoEqual(String cod_prod) {

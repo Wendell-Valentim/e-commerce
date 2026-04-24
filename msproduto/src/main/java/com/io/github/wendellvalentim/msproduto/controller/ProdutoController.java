@@ -43,6 +43,12 @@ public class ProdutoController implements GenericController {
     }
 
     @GetMapping("{id}")
+    @Operation(summary = "Detalhes", description = "Obter detalhes de um produto pelo ID!")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Produto encontrado!"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado!")
+
+    })
     public ResponseEntity<ProdutoResponseDTO> obterDetalhes (@PathVariable("id")UUID id){
        var produtoDTO = mapper.toDTO(produtoService.buscar(id));
 
@@ -50,6 +56,12 @@ public class ProdutoController implements GenericController {
     }
 
     @PatchMapping("{id}")
+    @Operation(summary = "Atualizar", description = "Atualiza um Produto Existente!")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Atualizado com sucesso!"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado!"),
+            @ApiResponse(responseCode = "400", description = "Codigo de produto ja Cadastrado!")
+    })
     public ResponseEntity<ProdutoResponseDTO> atualizar(@PathVariable("id") UUID id,
                                                         @Valid @RequestBody ProdutoUpdateDTO request) {
         Produto prodAtualizado = produtoService.atualizar(id,request);
@@ -58,13 +70,23 @@ public class ProdutoController implements GenericController {
     }
 
     @DeleteMapping("{id}")
+    @Operation(summary = "Deletar ", description = "Deleta um produto existente!")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Deletado com sucesso!"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado!")
+    })
     public ResponseEntity<Void> deletar(@PathVariable("id") UUID id) {
         produtoService.deletar(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProdutoResponseDTO>> pesquisa(@RequestParam(value = "nome", required = false)
+    @Operation(summary = "Pesquisar", description = "Pesquisar um Produto por parametro(s)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sucesso.")
+
+    })
+    public ResponseEntity<Page<ProdutoResponseDTO>> pesquisar(@RequestParam(value = "nome", required = false)
                                                              String nome,
                                                              @RequestParam(value = "preco", required = false)
                                                              BigDecimal preco,
@@ -81,6 +103,12 @@ public class ProdutoController implements GenericController {
     }
 
     @PatchMapping("/diminuir/{id}")
+    @Operation(summary = "Diminuir", description = "Diminuir o estoque de um produto!")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estoque atualizado!"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado!"),
+            @ApiResponse(responseCode = "400", description = "Erro ao diminuir o estoque!")
+    })
     public ResponseEntity<EstoqueResponseDTO> diminuirEstoque
             (       @PathVariable(name = "id",required = true) UUID id,
                     @Valid @RequestBody EstoqueUpdateDTO request
@@ -94,6 +122,12 @@ public class ProdutoController implements GenericController {
     }
 
     @PatchMapping("/aumentar/{id}")
+    @Operation(summary = "Aumentar", description = "Aumentar o estoque de um produto!")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estoque atualizado!"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado!"),
+            @ApiResponse(responseCode = "400", description = "Erro ao aumentar o estoque!")
+    })
     public ResponseEntity<EstoqueResponseDTO> aumentarEstoque (
             @PathVariable(name = "id", required = true) UUID id,
             @Valid @RequestBody EstoqueUpdateDTO request

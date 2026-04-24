@@ -5,6 +5,7 @@ import com.io.github.wendellvalentim.msproduto.controller.dto.ErroResponse;
 import com.io.github.wendellvalentim.msproduto.exceptions.CodProdExists;
 import com.io.github.wendellvalentim.msproduto.exceptions.EstoqueInsuficienteException;
 import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
+import com.io.github.wendellvalentim.msproduto.exceptions.ValorNegativoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,6 +31,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CodProdExists.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErroResponse handleCodProdExists (CodProdExists e) {
+        return  new ErroResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(ValorNegativoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResponse handleValorNegativoException (ValorNegativoException e) {
         return  new ErroResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of());
     }
 

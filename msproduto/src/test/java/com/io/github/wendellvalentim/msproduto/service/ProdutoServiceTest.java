@@ -6,6 +6,7 @@ import com.io.github.wendellvalentim.msproduto.controller.dto.produto.ProdutoCre
 import com.io.github.wendellvalentim.msproduto.exceptions.CodProdExists;
 import com.io.github.wendellvalentim.msproduto.exceptions.EstoqueInsuficienteException;
 import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
+import com.io.github.wendellvalentim.msproduto.exceptions.ValorNegativoException;
 import com.io.github.wendellvalentim.msproduto.mappers.ProdutoMapper;
 import com.io.github.wendellvalentim.msproduto.model.Produto;
 import com.io.github.wendellvalentim.msproduto.repository.ProdutoRepository;
@@ -157,6 +158,33 @@ import static org.mockito.Mockito.*;
         assertThrows(EstoqueInsuficienteException.class, () -> {
             service.baixarEstoquePorPedido(produto.getId(), pedido);
         });
+        verify(repository, never()).save(produto);
+    }
+
+    @Test
+    void deveAumentarOEstoque() {
+        produto.setQuantidade(10);
+        when(repository.findById(produto.getId())).thenReturn(Optional.of(produto));
+
+        Produto pedido = new Produto();
+        pedido.setQuantidade(5);
+
+        service.aumentarEstoque(produto.getId(), pedido);
+
+        assertThat(produto.getQuantidade()).isEqualTo(15);
+    }
+
+    @Test
+    void deveDarErroAoMandarUmValorNegativoParaOEstoque() {
+        produto.setQuantidade(10);
+
+        Produto pedido = new Produto();
+        pedido.setQuantidade(-15);
+
+        assertThrows(ValorNegativoException.class, () -> {
+            service.aumentarEstoque(produto.getId(), pedido);
+        });
+        verify(repository, never()).findById(any());
         verify(repository, never()).save(produto);
     }
 }
