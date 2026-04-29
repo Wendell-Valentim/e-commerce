@@ -4,11 +4,12 @@ import com.io.github.wendellvalentim.msproduto.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Schema(name = "Reposta Produto")
-public record ProdutoResponseDTO (
+public record ProdutoResponseDTO (  UUID id,
 
-                                 String nome,
+                                    String nome,
 
                                   BigDecimal preco,
 
