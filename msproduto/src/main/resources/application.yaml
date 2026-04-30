@@ -1,6 +1,11 @@
 spring:
   application:
     name: msproduto
+  rabbitmq:
+    host: localhost
+    port: 5673
+    username: guest
+    password: guest
 h2:
   console:
     enabled: true
@@ -20,3 +25,6 @@ eureka:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 springdoc:
   override-with-generic-response: false
+mq:
+  queues:
+    produto.v1.pedido-criado.estoque-baixa: produto.v1.pedido-criado.estoque-baixa

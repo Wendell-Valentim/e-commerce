@@ -2,7 +2,10 @@ package com.io.github.wendellvalentim.mspedido.service;
 
 import com.io.github.wendellvalentim.mspedido.controller.dto.PedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.enums.StatusPedido;
+import com.io.github.wendellvalentim.mspedido.event.PedidoCriadoEvent;
+import com.io.github.wendellvalentim.mspedido.exception.EstoqueInsuficienteException;
 import com.io.github.wendellvalentim.mspedido.infra.ProdutoResourceClient;
+import com.io.github.wendellvalentim.mspedido.infra.mqueue.ProdutoPublisher;
 import com.io.github.wendellvalentim.mspedido.mapper.ItemPedidoMapper;
 import com.io.github.wendellvalentim.mspedido.model.ItemPedido;
 import com.io.github.wendellvalentim.mspedido.model.Pedido;
@@ -26,6 +29,7 @@ public class PedidoService {
     private final ItemPedidoRepository itemPedidoRepository;
     private final ProdutoResourceClient produtoResourceClient;
     private final ItemPedidoMapper mapper;
+    private final ProdutoPublisher produtoPublisher;
 
     @Transactional
     public Pedido salvar (PedidoRequestDTO request) {
@@ -38,7 +42,7 @@ public class PedidoService {
             ProdutoResponseDTO produtoData = response.getBody();
 
             if (produtoData.estoqueDisponivel() < itemDTO.quantidade()) {
-                throw new RuntimeException("Estoque insuficiente para o produto: " + produtoData.nomeProduto());
+                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produtoData.nomeProduto());
             }
 
             ItemPedido itemEntity = mapper.toEntity(produtoData);
@@ -59,6 +63,17 @@ public class PedidoService {
         pedido.setItems(listaDeItens);
         pedido.setTotal(totalPedido);
 
-        return  pedidoRepository.save(pedido);
+        Pedido pedidoSalvo =  pedidoRepository.save(pedido);
+
+        pedidoSalvo.getItems().forEach(item -> {
+            PedidoCriadoEvent event = new PedidoCriadoEvent(item.getProdutoId(), item.getQuantidade());
+            this.solicitarBaixaDoEstoque(event);
+        });
+        return pedidoSalvo;
+    }
+
+    public void solicitarBaixaDoEstoque(PedidoCriadoEvent event) {
+        produtoPublisher.abaixarEstoqueProduto(event);
+        System.out.println("Efetuado!");
     }
 }
