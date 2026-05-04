@@ -83,14 +83,14 @@ public class ProdutoService {
     }
 
     @Transactional
-    public Produto baixarEstoquePorPedido(UUID id, Produto request) {
+    public Produto baixarEstoquePorPedido(UUID id, Integer quantidade) {
         Produto produto = buscar(id);
 
-        if(produto.getQuantidade() < request.getQuantidade()) {
+        if(produto.getQuantidade() < quantidade) {
             throw new EstoqueInsuficienteException("Estoque indisponivel!");
         }
 
-        produto.setQuantidade(produto.getQuantidade() - request.getQuantidade());
+        produto.setQuantidade(produto.getQuantidade() - quantidade);
         return produtoRepository.save(produto);
     }
 

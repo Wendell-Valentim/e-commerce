@@ -1,6 +1,7 @@
 package com.io.github.wendellvalentim.msproduto.infra.mqueue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.io.github.wendellvalentim.msproduto.exceptions.ProdutoNaoEncontradoException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -18,6 +19,7 @@ public class MqConfig {
 
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
+        objectMapper.registerModule(new JavaTimeModule());
         return new Jackson2JsonMessageConverter(objectMapper);
     }
 
@@ -38,7 +40,7 @@ public class MqConfig {
                 throw new AmqpRejectAndDontRequeueException(t.getMessage(), t);
             } else {
                 log.error("Erro de Infra/Inesperado: Tentando processar novamente... {}", t.getMessage());
-
+                throw new AmqpRejectAndDontRequeueException(t.getMessage(), t);
             }
         });
         return factory;

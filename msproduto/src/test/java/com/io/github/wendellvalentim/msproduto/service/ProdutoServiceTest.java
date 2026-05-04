@@ -140,7 +140,7 @@ import static org.mockito.Mockito.*;
         Produto pedido = new Produto();
         pedido.setQuantidade(3);
 
-        service.baixarEstoquePorPedido(produto.getId(), pedido);
+        service.baixarEstoquePorPedido(produto.getId(), pedido.getQuantidade());
 
         assertEquals(7, produto.getQuantidade());
 
@@ -156,7 +156,7 @@ import static org.mockito.Mockito.*;
         pedido.setQuantidade(11);
 
         assertThrows(EstoqueInsuficienteException.class, () -> {
-            service.baixarEstoquePorPedido(produto.getId(), pedido);
+            service.baixarEstoquePorPedido(produto.getId(), pedido.getQuantidade());
         });
         verify(repository, never()).save(produto);
     }

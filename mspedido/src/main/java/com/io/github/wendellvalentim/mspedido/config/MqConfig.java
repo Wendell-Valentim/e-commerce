@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MqConfig {
-    @Value("${mq.queues.produto.v1.pedido-criado.estoque-baixa: produto.v1.pedido-criado.estoque-baixa}")
+    @Value("${mq.queues.produto.v1.pedido-criado.estoque-baixa:produto.v1.pedido-criado.estoque-baixa}")
     private String baixaEstoqueFila;
 
     @Bean

@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record ProdutoResponseDTO(UUID produtoId,
+public record ProdutoResponseDTO(
+                                 @JsonProperty("id")
+                                 UUID produtoId,
                                  @JsonProperty("nome")
                                  String nomeProduto,
                                  @JsonProperty("codProduto")

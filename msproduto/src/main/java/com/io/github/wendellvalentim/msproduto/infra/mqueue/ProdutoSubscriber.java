@@ -18,8 +18,7 @@ public class ProdutoSubscriber {
 
         System.out.println("Recebido pedido para o produto: " + event.produtoId());
 
-        // Passa o produto que você buscou na linha de cima como 2º parâmetro
-        Produto produto = produtoService.buscar(event.produtoId());
-        produtoService.baixarEstoquePorPedido(event.produtoId(), produto);
+
+        produtoService.baixarEstoquePorPedido(event.produtoId(), event.quantidade());
     }
 }

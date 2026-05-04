@@ -18,7 +18,7 @@ public class ItemPedido {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private UUID produtoId;
 
     @Column(nullable = false)

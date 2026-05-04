@@ -38,6 +38,10 @@ public class PedidoService {
         pedido.setStatus(StatusPedido.RECEBIDO);
         List<ItemPedido> listaDeItens = request.itens().stream().map(itemDTO -> {
 
+            if (itemDTO.produtoId() == null) {
+                throw new IllegalArgumentException("produtoId não pode ser nulo");
+            }
+
             ResponseEntity<ProdutoResponseDTO> response = produtoResourceClient.getProdutosById(itemDTO.produtoId());
             ProdutoResponseDTO produtoData = response.getBody();
 

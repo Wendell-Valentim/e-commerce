@@ -51,10 +51,5 @@ public class GlobalExceptionHandler {
                 .body(new ErroResposta(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErroResposta> handleGeneralException(Exception e) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErroResposta("Ocorreu um erro interno inesperado no sistema."));
-    }
+
 }
