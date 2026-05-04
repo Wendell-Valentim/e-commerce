@@ -28,4 +28,11 @@ springdoc:
 
 mq:
   queues:
-    produto.v1.pedido-criado.estoque-baixa: produto.v1.pedido-criado.estoque-baixa
+    produto:
+      v1:
+        pedido-criado:
+          estoque-baixa: produto.v1.pedido-criado.estoque-baixa
+        pedido-cancelado:
+          estoque-repor: produto.v1.pedido-cancelado.estoque-repor
+
+

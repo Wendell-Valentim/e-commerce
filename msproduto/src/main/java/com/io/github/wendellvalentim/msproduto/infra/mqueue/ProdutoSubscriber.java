@@ -21,4 +21,13 @@ public class ProdutoSubscriber {
 
         produtoService.baixarEstoquePorPedido(event.produtoId(), event.quantidade());
     }
+
+    @RabbitListener(queues = "${mq.queues.produto.v1.pedido-cancelado.estoque-repor}")
+    public void receberSolicitacaoREstoque(@Payload PedidoCriadoEvent event){
+
+        System.out.println("Recebido pedido para o produto: " + event.produtoId());
+
+
+        produtoService.aumentarEstoque(event.produtoId(), event.quantidade());
+    }
 }

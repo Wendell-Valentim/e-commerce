@@ -169,20 +169,19 @@ import static org.mockito.Mockito.*;
         Produto pedido = new Produto();
         pedido.setQuantidade(5);
 
-        service.aumentarEstoque(produto.getId(), pedido);
+        service.aumentarEstoque(produto.getId(), pedido.getQuantidade());
 
         assertThat(produto.getQuantidade()).isEqualTo(15);
     }
 
     @Test
     void deveDarErroAoMandarUmValorNegativoParaOEstoque() {
-        produto.setQuantidade(10);
 
-        Produto pedido = new Produto();
-        pedido.setQuantidade(-15);
+        UUID idQualquer = UUID.randomUUID();
+        Integer quantidade = -15;
 
         assertThrows(ValorNegativoException.class, () -> {
-            service.aumentarEstoque(produto.getId(), pedido);
+            service.aumentarEstoque(idQualquer, quantidade);
         });
         verify(repository, never()).findById(any());
         verify(repository, never()).save(produto);

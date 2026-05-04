@@ -4,6 +4,8 @@ import com.io.github.wendellvalentim.mspedido.controller.dto.PedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.enums.StatusPedido;
 import com.io.github.wendellvalentim.mspedido.event.PedidoCriadoEvent;
 import com.io.github.wendellvalentim.mspedido.exception.EstoqueInsuficienteException;
+import com.io.github.wendellvalentim.mspedido.exception.NaoÉPossivelCancelarException;
+import com.io.github.wendellvalentim.mspedido.exception.PedidoNaoEncontradoException;
 import com.io.github.wendellvalentim.mspedido.infra.ProdutoResourceClient;
 import com.io.github.wendellvalentim.mspedido.infra.mqueue.ProdutoPublisher;
 import com.io.github.wendellvalentim.mspedido.mapper.ItemPedidoMapper;
@@ -66,6 +68,7 @@ public class PedidoService {
 
         pedido.setItems(listaDeItens);
         pedido.setTotal(totalPedido);
+        pedido.setStatus(StatusPedido.APROVADO);
 
         Pedido pedidoSalvo =  pedidoRepository.save(pedido);
 
@@ -79,5 +82,33 @@ public class PedidoService {
     public void solicitarBaixaDoEstoque(PedidoCriadoEvent event) {
         produtoPublisher.abaixarEstoqueProduto(event);
         System.out.println("Efetuado!");
+    }
+
+    public void aumentarEstoque(PedidoCriadoEvent event){
+        produtoPublisher.aumentarEstoqueProdut(event);
+        System.out.println("Efetuado!");
+    }
+
+    @Transactional
+    public Pedido solicitarCancelamentoPedido(UUID id) {
+       Pedido pedidoEncontrado = pedidoRepository.findById(id).orElseThrow(() -> new PedidoNaoEncontradoException
+               ("Pedido não encontrado!"));
+        List<StatusPedido> statusCancelaveis = List.of(StatusPedido.APROVADO, StatusPedido.PROCESSANDO);
+
+        if(!statusCancelaveis.contains(pedidoEncontrado.getStatus())) {
+            throw new NaoÉPossivelCancelarException("Nao é possivel cancelar o pedido! Status atual:" + pedidoEncontrado.getStatus());
+        }
+
+        pedidoEncontrado.setStatus(StatusPedido.CANCELADO);
+        Pedido pedidoCancelado = pedidoRepository.save(pedidoEncontrado);
+
+        pedidoEncontrado.getItems().forEach(item ->{
+            PedidoCriadoEvent event = new PedidoCriadoEvent(item.getProdutoId(), item.getQuantidade());
+            this.aumentarEstoque(event);
+        });
+
+        System.out.println("Pedido cancelado com sucesso!");
+        return pedidoCancelado;
+
     }
 }

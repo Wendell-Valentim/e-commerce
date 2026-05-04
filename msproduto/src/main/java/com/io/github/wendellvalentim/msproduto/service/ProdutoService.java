@@ -95,12 +95,13 @@ public class ProdutoService {
     }
 
     @Transactional
-    public Produto aumentarEstoque(UUID id, Produto request) {
-        if( request.getQuantidade() <= 0 || request.getQuantidade() == null) {
+    public Produto aumentarEstoque(UUID id, Integer quantidade) {
+
+        if( quantidade <= 0 || quantidade == null) {
             throw new ValorNegativoException("O valor não pode ser menor ou igual a zero!");
         }
         Produto produto = buscar(id);
-        produto.setQuantidade(produto.getQuantidade() + request.getQuantidade());
+        produto.setQuantidade(produto.getQuantidade() + quantidade);
 
         return  produtoRepository.save(produto);
     }
