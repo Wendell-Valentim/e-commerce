@@ -1,6 +1,6 @@
 package com.io.github.wendellvalentim.mspedido.service;
 
-import com.io.github.wendellvalentim.mspedido.controller.dto.PedidoRequestDTO;
+import com.io.github.wendellvalentim.mspedido.controller.dto.Pedido.PedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.enums.StatusPedido;
 import com.io.github.wendellvalentim.mspedido.event.PedidoCriadoEvent;
 import com.io.github.wendellvalentim.mspedido.exception.EstoqueInsuficienteException;
@@ -89,10 +89,13 @@ public class PedidoService {
         System.out.println("Efetuado!");
     }
 
+    public Pedido buscarPorId(UUID id) {
+        return pedidoRepository.findById(id).orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+    }
+
     @Transactional
     public Pedido solicitarCancelamentoPedido(UUID id) {
-       Pedido pedidoEncontrado = pedidoRepository.findById(id).orElseThrow(() -> new PedidoNaoEncontradoException
-               ("Pedido não encontrado!"));
+       Pedido pedidoEncontrado = buscarPorId(id);
         List<StatusPedido> statusCancelaveis = List.of(StatusPedido.APROVADO, StatusPedido.PROCESSANDO);
 
         if(!statusCancelaveis.contains(pedidoEncontrado.getStatus())) {

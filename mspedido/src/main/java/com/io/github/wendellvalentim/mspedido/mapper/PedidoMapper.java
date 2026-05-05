@@ -4,13 +4,12 @@ import com.io.github.wendellvalentim.mspedido.controller.dto.ItemPedido.ItemPedi
 import com.io.github.wendellvalentim.mspedido.controller.dto.Pedido.PedidoResponseDTO;
 import com.io.github.wendellvalentim.mspedido.model.ItemPedido;
 import com.io.github.wendellvalentim.mspedido.model.Pedido;
-import com.io.github.wendellvalentim.mspedido.model.produto.ProdutoResponseDTO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface ItemPedidoMapper {
+public interface PedidoMapper {
 
-    ItemPedido toEntity(ProdutoResponseDTO dto);
+    PedidoResponseDTO toDTO (Pedido pedido);
 
-
+    ItemPedidoResponseDTO itemPedidoToDto(ItemPedido itemPedido);
 }

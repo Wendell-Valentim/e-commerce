@@ -1,4 +1,4 @@
-package com.io.github.wendellvalentim.mspedido.controller.dto;
+package com.io.github.wendellvalentim.mspedido.controller.dto.Pedido;
 
 import java.util.UUID;
 

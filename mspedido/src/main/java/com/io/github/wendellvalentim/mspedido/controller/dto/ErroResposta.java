@@ -1,4 +1,8 @@
 package com.io.github.wendellvalentim.mspedido.controller.dto;
 
-public record ErroResposta(String mensagem) {
+import java.util.List;
+
+public record ErroResposta(int status,
+                           String mensagem,
+                           List<ErroCampo> erros) {
 }

@@ -47,7 +47,6 @@ public class GlobalExceptionHandler {
     }
 
 
-
     @ExceptionHandler(ProdutoNaoEncontradoException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErroResponse handleUsuarioNaoEncontradoException(ProdutoNaoEncontradoException e) {
