@@ -14,6 +14,7 @@ import com.io.github.wendellvalentim.mspedido.model.Pedido;
 import com.io.github.wendellvalentim.mspedido.model.produto.ProdutoResponseDTO;
 import com.io.github.wendellvalentim.mspedido.repository.ItemPedidoRepository;
 import com.io.github.wendellvalentim.mspedido.repository.PedidoRepository;
+import com.io.github.wendellvalentim.mspedido.validators.ProdutoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ public class PedidoService {
     private final ProdutoResourceClient produtoResourceClient;
     private final ItemPedidoMapper mapper;
     private final ProdutoPublisher produtoPublisher;
+    private final ProdutoValidator produtoValidator;
 
     @Transactional
     public Pedido salvar (PedidoRequestDTO request) {
@@ -40,16 +42,10 @@ public class PedidoService {
         pedido.setStatus(StatusPedido.RECEBIDO);
         List<ItemPedido> listaDeItens = request.itens().stream().map(itemDTO -> {
 
-            if (itemDTO.produtoId() == null) {
-                throw new IllegalArgumentException("produtoId não pode ser nulo");
-            }
-
             ResponseEntity<ProdutoResponseDTO> response = produtoResourceClient.getProdutosById(itemDTO.produtoId());
             ProdutoResponseDTO produtoData = response.getBody();
 
-            if (produtoData.estoqueDisponivel() < itemDTO.quantidade()) {
-                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produtoData.nomeProduto());
-            }
+            produtoValidator.validar(itemDTO,produtoData);
 
             ItemPedido itemEntity = mapper.toEntity(produtoData);
 
