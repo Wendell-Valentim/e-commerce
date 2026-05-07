@@ -2,7 +2,7 @@ package com.io.github.wendellvalentim.mspedido.controller.common;
 
 import com.io.github.wendellvalentim.mspedido.controller.dto.ErroCampo;
 import com.io.github.wendellvalentim.mspedido.controller.dto.ErroResposta;
-import com.io.github.wendellvalentim.mspedido.exception.EstoqueInsuficienteException;
+import com.io.github.wendellvalentim.mspedido.exception.*;
 import feign.FeignException;
 import feign.RetryableException;
 import org.springframework.http.HttpStatus;
@@ -66,5 +66,36 @@ public class GlobalExceptionHandler {
                 .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(),e.getMessage(), List.of()));
     }
 
+    @ExceptionHandler(NaoEPossivelCancelarException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErroResposta> handleNaoEPossivelCancelarException(NaoEPossivelCancelarException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(PedidoNaoEncontradoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErroResposta> handlePedidoNaoEncontradoException(PedidoNaoEncontradoException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(ValorMinimoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErroResposta> handleValorMinimoException(ValorMinimoException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+    }
+
+    @ExceptionHandler(CampoInvalidoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErroResposta> handleCampoInvalidoException(CampoInvalidoException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+    }
 
 }

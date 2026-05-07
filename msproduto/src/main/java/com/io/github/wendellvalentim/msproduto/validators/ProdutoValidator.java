@@ -18,7 +18,6 @@ public class ProdutoValidator {
         }
     }
 
-
     public boolean existeCodProd(Produto produto) {
         return produtoRepository.findByCodProduto(produto.getCodProduto())
                 .map(pEncontrado -> !pEncontrado.getId().equals(produto.getId()))

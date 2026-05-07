@@ -20,9 +20,10 @@ public class Pedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(unique = true)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String codigoPedido;
 
     @Column(nullable = false)

@@ -3,8 +3,6 @@ package com.io.github.wendellvalentim.mspedido.service;
 import com.io.github.wendellvalentim.mspedido.controller.dto.Pedido.PedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.enums.StatusPedido;
 import com.io.github.wendellvalentim.mspedido.event.PedidoCriadoEvent;
-import com.io.github.wendellvalentim.mspedido.exception.EstoqueInsuficienteException;
-import com.io.github.wendellvalentim.mspedido.exception.NaoÉPossivelCancelarException;
 import com.io.github.wendellvalentim.mspedido.exception.PedidoNaoEncontradoException;
 import com.io.github.wendellvalentim.mspedido.infra.ProdutoResourceClient;
 import com.io.github.wendellvalentim.mspedido.infra.mqueue.ProdutoPublisher;
@@ -12,8 +10,8 @@ import com.io.github.wendellvalentim.mspedido.mapper.ItemPedidoMapper;
 import com.io.github.wendellvalentim.mspedido.model.ItemPedido;
 import com.io.github.wendellvalentim.mspedido.model.Pedido;
 import com.io.github.wendellvalentim.mspedido.model.produto.ProdutoResponseDTO;
-import com.io.github.wendellvalentim.mspedido.repository.ItemPedidoRepository;
 import com.io.github.wendellvalentim.mspedido.repository.PedidoRepository;
+import com.io.github.wendellvalentim.mspedido.validators.PedidoValidator;
 import com.io.github.wendellvalentim.mspedido.validators.ProdutoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +27,11 @@ import java.util.UUID;
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
-    private final ItemPedidoRepository itemPedidoRepository;
     private final ProdutoResourceClient produtoResourceClient;
     private final ItemPedidoMapper mapper;
     private final ProdutoPublisher produtoPublisher;
     private final ProdutoValidator produtoValidator;
+    private final PedidoValidator pedidoValidator;
 
     @Transactional
     public Pedido salvar (PedidoRequestDTO request) {
@@ -62,9 +60,12 @@ public class PedidoService {
                 .map(ItemPedido::getSubTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        pedidoValidator.validarNovoPedido(request,totalPedido);
+
         pedido.setItems(listaDeItens);
         pedido.setTotal(totalPedido);
         pedido.setStatus(StatusPedido.APROVADO);
+
 
         Pedido pedidoSalvo =  pedidoRepository.save(pedido);
 
@@ -92,11 +93,8 @@ public class PedidoService {
     @Transactional
     public Pedido solicitarCancelamentoPedido(UUID id) {
        Pedido pedidoEncontrado = buscarPorId(id);
-        List<StatusPedido> statusCancelaveis = List.of(StatusPedido.APROVADO, StatusPedido.PROCESSANDO);
 
-        if(!statusCancelaveis.contains(pedidoEncontrado.getStatus())) {
-            throw new NaoÉPossivelCancelarException("Nao é possivel cancelar o pedido! Status atual:" + pedidoEncontrado.getStatus());
-        }
+        pedidoValidator.validarCancelamento(pedidoEncontrado);
 
         pedidoEncontrado.setStatus(StatusPedido.CANCELADO);
         Pedido pedidoCancelado = pedidoRepository.save(pedidoEncontrado);

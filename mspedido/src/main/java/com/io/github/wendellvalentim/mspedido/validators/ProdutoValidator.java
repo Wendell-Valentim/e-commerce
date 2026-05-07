@@ -23,12 +23,12 @@ public class ProdutoValidator {
     }
 
 
-private boolean validarId(ItemPedidoRequestDTO item) {
-    return item.produtoId() == null;
-}
+    private boolean validarId(ItemPedidoRequestDTO item) {
+        return item.produtoId() == null;
+    }
 
-private boolean validarEstoqueDisponivel(ProdutoResponseDTO produtoData, Integer quantidade) {
-    return produtoData.estoqueDisponivel() < quantidade;
-}
+    private boolean validarEstoqueDisponivel(ProdutoResponseDTO produtoData, Integer quantidade) {
+        return produtoData.estoqueDisponivel() < quantidade;
+    }
 
 }
