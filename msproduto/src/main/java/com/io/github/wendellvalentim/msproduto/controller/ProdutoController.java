@@ -38,7 +38,7 @@ public class ProdutoController implements GenericController {
     })
     public ResponseEntity<Void> salvar (@Valid @RequestBody ProdutoCreatedDTO request) {
         Produto produto = produtoService.salvar(request);
-        URI location = gerarHeaderLocation(produto.getId());
+            URI location = gerarHeaderLocation(produto.getId());
         return ResponseEntity.created(location).build();
     }
 

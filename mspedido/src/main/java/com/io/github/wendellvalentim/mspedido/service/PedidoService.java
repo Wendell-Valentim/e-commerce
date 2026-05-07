@@ -15,12 +15,19 @@ import com.io.github.wendellvalentim.mspedido.validators.PedidoValidator;
 import com.io.github.wendellvalentim.mspedido.validators.ProdutoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static com.io.github.wendellvalentim.mspedido.repository.PedidoSpecs.*;
 
 @Service
 @RequiredArgsConstructor
@@ -107,5 +114,30 @@ public class PedidoService {
         System.out.println("Pedido cancelado com sucesso!");
         return pedidoCancelado;
 
+    }
+
+    public Page<Pedido> pesquisa(String codPedido,
+                                 String nomeProduto,
+                                 LocalDate dataBusca,
+                                 Integer pagina,
+                                 Integer tamanhoPagina) {
+
+        Specification<Pedido> specs = Specification.where((root, query, cb) ->
+                cb.conjunction());
+        if (codPedido != null) {
+            specs = specs.and(codPedidoLike(codPedido));
+        }
+
+        if(nomeProduto != null) {
+            specs = specs.and(nomeProdutoLike(nomeProduto));
+        }
+
+        if(dataBusca != null) {
+            specs = specs.and(dataPedidoEqual(dataBusca));
+        }
+
+        Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);
+
+        return pedidoRepository.findAll(specs, pageRequest);
     }
 }
