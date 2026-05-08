@@ -59,39 +59,34 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EstoqueInsuficienteException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErroResposta> handleEstoqueInsuficienteException(EstoqueInsuficienteException e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(),e.getMessage(), List.of()));
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErroResposta(HttpStatus.UNPROCESSABLE_ENTITY.value(),e.getMessage(), List.of()));
     }
 
     @ExceptionHandler(NaoEPossivelCancelarException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErroResposta> handleNaoEPossivelCancelarException(NaoEPossivelCancelarException e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErroResposta(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), List.of()));
     }
 
     @ExceptionHandler(PedidoNaoEncontradoException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErroResposta> handlePedidoNaoEncontradoException(PedidoNaoEncontradoException e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErroResposta(HttpStatus.NOT_FOUND.value(), e.getMessage(), List.of()));
     }
 
     @ExceptionHandler(ValorMinimoException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErroResposta> handleValorMinimoException(ValorMinimoException e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErroResposta(HttpStatus.BAD_REQUEST.value(), e.getMessage(), List.of()));
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErroResposta(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), List.of()));
     }
 
     @ExceptionHandler(CampoInvalidoException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErroResposta> handleCampoInvalidoException(CampoInvalidoException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: mscloudgateway
+  cloud:
+    gateway:
+      discovery:
+        locato:
+          enabled: true
+          lower-case-service-id: true
+server:
+  port: 8080
+
+eureka:
+  client:
+    tech-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultzone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
