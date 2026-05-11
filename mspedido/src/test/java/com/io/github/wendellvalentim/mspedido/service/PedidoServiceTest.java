@@ -168,7 +168,7 @@ public class PedidoServiceTest {
         when(itemPedidoMapper.toEntity(any())).thenReturn(itemPedido);
 
         doThrow(new ValorMinimoException("Valor minimo insuficiente")).when(pedidoValidator).validarNovoPedido(
-                pedidoRequestDTO, any()
+                pedidoRequestDTO, new BigDecimal("200.00")
         );
 
         assertThrows(ValorMinimoException.class, () -> pedidoService.salvar(pedidoRequestDTO));
