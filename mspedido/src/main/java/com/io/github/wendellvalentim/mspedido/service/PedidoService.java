@@ -83,6 +83,10 @@ public class PedidoService {
         return pedidoSalvo;
     }
 
+    public Pedido buscarPorId(UUID id) {
+        return pedidoRepository.findById(id).orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+    }
+
     public void solicitarBaixaDoEstoque(PedidoCriadoEvent event) {
         produtoPublisher.abaixarEstoqueProduto(event);
         System.out.println("Efetuado!");
@@ -93,9 +97,6 @@ public class PedidoService {
         System.out.println("Efetuado!");
     }
 
-    public Pedido buscarPorId(UUID id) {
-        return pedidoRepository.findById(id).orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
-    }
 
     @Transactional
     public Pedido solicitarCancelamentoPedido(UUID id) {

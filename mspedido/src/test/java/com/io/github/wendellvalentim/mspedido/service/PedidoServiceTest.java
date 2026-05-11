@@ -4,8 +4,8 @@ package com.io.github.wendellvalentim.mspedido.service;
 import com.io.github.wendellvalentim.mspedido.controller.dto.ItemPedido.ItemPedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.controller.dto.Pedido.PedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.enums.StatusPedido;
-import com.io.github.wendellvalentim.mspedido.exception.EstoqueInsuficienteException;
-import com.io.github.wendellvalentim.mspedido.exception.ValorMinimoException;
+import com.io.github.wendellvalentim.mspedido.event.PedidoCriadoEvent;
+import com.io.github.wendellvalentim.mspedido.exception.*;
 import com.io.github.wendellvalentim.mspedido.infra.ProdutoResourceClient;
 import com.io.github.wendellvalentim.mspedido.infra.mqueue.ProdutoPublisher;
 import com.io.github.wendellvalentim.mspedido.mapper.ItemPedidoMapper;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.*;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -127,6 +128,22 @@ public class PedidoServiceTest {
         verify(produtoPublisher, times(1)).abaixarEstoqueProduto(any());
     }
 
+
+    @Test
+    @DisplayName("Deve dar erro quando o ProdutoId for nulo")
+    void deveLancarErroProdutoIdNulo() {
+
+        when(produtoResourceClient.getProdutosById(any())).thenReturn(ResponseEntity.ok(produtoResponseDTO));
+
+        doThrow(new IllegalArgumentException("produtoId não pode ser nulo"))
+                .when(produtoValidator).validar(itemPedidoRequestDTO, produtoResponseDTO);
+
+        assertThrows(IllegalArgumentException.class, () -> pedidoService.salvar(pedidoRequestDTO));
+
+        verify(pedidoRepository, never()).save(any());
+    }
+
+
     @Test
     @DisplayName("Deve dar erro de Estoque insuficiente")
     void deveDarErroDeEstoqueInsuficiente() {
@@ -156,6 +173,115 @@ public class PedidoServiceTest {
 
         assertThrows(ValorMinimoException.class, () -> pedidoService.salvar(pedidoRequestDTO));
     }
+
+
+    @Test
+    @DisplayName("Deve lançar erro quando a lista de itens estiver vazia")
+    void deveLancarErroAoReceberListaVazia() {
+        PedidoRequestDTO requestSemItens = new PedidoRequestDTO(Collections.emptyList());
+
+        doThrow(new CampoInvalidoException("O pedido deve ter pelo menos um item."))
+                .when(pedidoValidator).validarNovoPedido(eq(requestSemItens), eq(BigDecimal.ZERO));
+
+        assertThrows(CampoInvalidoException.class, () -> pedidoService.salvar(requestSemItens));
+
+        verifyNoInteractions(produtoResourceClient);
+    }
+
+    @Test
+    @DisplayName("Deve lançar erro Quando o serviço de produtos falhar")
+    void deveLancarErroQuandoServicoProdutoFalhar() {
+
+        when(produtoResourceClient.getProdutosById(any())).thenThrow(new RuntimeException("Servico Indisponivel!"));
+
+        assertThrows(RuntimeException.class, () -> pedidoService.salvar(pedidoRequestDTO));
+    }
+
+    @Test
+    @DisplayName("Deve retornar um Pedido")
+    void DeveRetornarUmPedidoPorId() {
+        when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
+
+        Pedido pedidoEncontrado = pedidoService.buscarPorId(pedido.getId());
+
+        assertNotNull(pedidoEncontrado);
+        assertEquals(pedido.getId(), pedidoEncontrado.getId());
+
+        verify(pedidoRepository, times(1)).findById(pedido.getId());
+    }
+
+    @Test
+    @DisplayName("Deve dar erro ao buscar um pedido")
+    void deveDarErroAoBuscarUmPedidoPorId() {
+        when(pedidoRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(PedidoNaoEncontradoException.class, () -> pedidoService.buscarPorId(pedido.getId()));
+
+        verify(pedidoRepository, times(1)).findById(pedido.getId());
+
+    }
+
+
+    @Test
+    @DisplayName("Deve abaixar o estoque")
+    void deveAbaixarOEstoque() {
+        PedidoCriadoEvent eventoEsperado = new PedidoCriadoEvent(
+                itemPedido.getProdutoId(),
+                itemPedido.getQuantidade()
+        );
+
+        pedidoService.solicitarBaixaDoEstoque(eventoEsperado);
+
+        verify(produtoPublisher, times(1)).abaixarEstoqueProduto(refEq(eventoEsperado));
+    }
+
+    @Test
+    @DisplayName("Deve repor o estoque")
+    void deveReporOEstoque() {
+        PedidoCriadoEvent eventoEsperado = new PedidoCriadoEvent(
+                itemPedido.getProdutoId(),
+                itemPedido.getQuantidade()
+        );
+
+        pedidoService.aumentarEstoque(eventoEsperado);
+
+        verify(produtoPublisher, times(1)).aumentarEstoqueProdut(refEq(eventoEsperado));
+
+    }
+
+    @Test
+    @DisplayName("Efetuar cancelamento do pedido")
+    void deveEfetuarOCancelamentoDoPedido() {
+        when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
+
+        when(pedidoRepository.save(any(Pedido.class))).thenReturn(pedido);
+
+
+        Pedido pedidoSalvo = pedidoService.solicitarCancelamentoPedido(pedido.getId());
+
+        assertNotNull(pedidoSalvo);
+
+        assertEquals(StatusPedido.CANCELADO, pedidoSalvo.getStatus());
+
+        verify(pedidoRepository, times(1)).save(pedidoSalvo);
+    }
+
+    @Test
+    @DisplayName("Deve lançar erro ao tentar alterar o Status do pedido")
+    void deveLancarErroAoAlteraroStatusDoPedido() {
+        when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
+
+        Pedido pedidoEncontrado = pedidoService.buscarPorId(pedido.getId());
+
+        doThrow(new NaoEPossivelCancelarException(
+                "Não é possível cancelar o pedido! Status atual:" + pedidoEncontrado.getStatus()))
+                .when(pedidoValidator).validarCancelamento(pedidoEncontrado);
+
+        assertThrows(NaoEPossivelCancelarException.class,
+                () -> pedidoService.solicitarCancelamentoPedido(pedidoEncontrado.getId()));
+
+    }
+
 
     }
 
