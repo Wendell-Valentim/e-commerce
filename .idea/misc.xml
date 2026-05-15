@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/mspedido/pom.xml" />
         <option value="$PROJECT_DIR$/gateway/pom.xml" />
         <option value="$PROJECT_DIR$/mscloudgateway/pom.xml" />
+        <option value="$PROJECT_DIR$/msuser/pom.xml" />
       </list>
     </option>
   </component>

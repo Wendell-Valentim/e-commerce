@@ -2,7 +2,6 @@ package com.io.github.wendellvalentim.mspedido.infra.mqueue;
 
 import com.io.github.wendellvalentim.mspedido.event.PedidoCriadoEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ public class ProdutoPublisher {
         rabbitTemplate.convertAndSend(filaBaixaEstoque, event);
     }
 
-    public void aumentarEstoqueProdut(PedidoCriadoEvent event) {
+    public void aumentarEstoqueProduto(PedidoCriadoEvent event) {
         rabbitTemplate.convertAndSend(filaEstornoEstoque, event);
     }
 

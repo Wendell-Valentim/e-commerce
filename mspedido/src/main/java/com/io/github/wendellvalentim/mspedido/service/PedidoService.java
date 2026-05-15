@@ -50,7 +50,7 @@ public class PedidoService {
             ResponseEntity<ProdutoResponseDTO> response = produtoResourceClient.getProdutosById(itemDTO.produtoId());
             ProdutoResponseDTO produtoData = response.getBody();
 
-            produtoValidator.validar(itemDTO,produtoData);
+            produtoValidator.validar(itemDTO, produtoData);
 
             ItemPedido itemEntity = mapper.toEntity(produtoData);
 
@@ -59,7 +59,6 @@ public class PedidoService {
             itemEntity.setPedido(pedido);
 
             itemEntity.setSubTotal(itemEntity.getPrecoUnitario().multiply(BigDecimal.valueOf(itemEntity.getQuantidade())));
-
             return itemEntity;
         }).toList();
 
@@ -93,7 +92,7 @@ public class PedidoService {
     }
 
     public void aumentarEstoque(PedidoCriadoEvent event){
-        produtoPublisher.aumentarEstoqueProdut(event);
+        produtoPublisher.aumentarEstoqueProduto(event);
         System.out.println("Efetuado!");
     }
 

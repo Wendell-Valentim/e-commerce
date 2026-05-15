@@ -16,7 +16,6 @@ import com.io.github.wendellvalentim.mspedido.model.produto.ProdutoResponseDTO;
 import com.io.github.wendellvalentim.mspedido.repository.PedidoRepository;
 import com.io.github.wendellvalentim.mspedido.validators.PedidoValidator;
 import com.io.github.wendellvalentim.mspedido.validators.ProdutoValidator;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import static  org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -245,7 +243,7 @@ public class PedidoServiceTest {
 
         pedidoService.aumentarEstoque(eventoEsperado);
 
-        verify(produtoPublisher, times(1)).aumentarEstoqueProdut(refEq(eventoEsperado));
+        verify(produtoPublisher, times(1)).aumentarEstoqueProduto(refEq(eventoEsperado));
 
     }
 

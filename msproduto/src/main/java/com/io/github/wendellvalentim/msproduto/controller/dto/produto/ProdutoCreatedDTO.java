@@ -22,6 +22,7 @@ public record ProdutoCreatedDTO (
                                  @Min(value = 1, message = "A quantidade não pode ser menor que 1!" )
                                  int quantidade,
 
+                                 String descricao,
 
                                  @NotNull
                                  String codProduto,

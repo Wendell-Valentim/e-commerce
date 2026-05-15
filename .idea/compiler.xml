@@ -10,17 +10,6 @@
         <module name="eurekaserver" />
         <module name="mscloudgateway" />
       </profile>
-      <profile name="Annotation profile for msproduto" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
-        </processorPath>
-        <module name="msproduto" />
-      </profile>
       <profile name="Annotation profile for mspedido" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -35,6 +24,18 @@
         </processorPath>
         <module name="mspedido" />
       </profile>
+      <profile name="Annotation profile for msuser" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
+        </processorPath>
+        <module name="msuser" />
+        <module name="msproduto" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -43,6 +44,7 @@
       <module name="mscloudgateway" options="-parameters" />
       <module name="mspedido" options="-parameters" />
       <module name="msproduto" options="-parameters" />
+      <module name="msuser" options="-parameters" />
     </option>
   </component>
 </project>

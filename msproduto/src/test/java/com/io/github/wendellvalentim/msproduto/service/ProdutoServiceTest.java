@@ -50,7 +50,7 @@ import static org.mockito.Mockito.*;
     @BeforeEach
     void setup() {
         UUID id = UUID.fromString("e092e7ea-6223-4f93-8a17-942df711774c");
-        dto = new ProdutoCreatedDTO("Televisao", new BigDecimal(3000), 10,"COD123", Status.DISPONIVEL);
+        dto = new ProdutoCreatedDTO("Televisao", new BigDecimal(3000), 10,"COD123",null ,Status.DISPONIVEL);
 
         produto = new Produto();
         produto.setId(id);
