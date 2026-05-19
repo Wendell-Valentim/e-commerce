@@ -20,20 +20,23 @@ public class SecurityConfig {
     CustomAuthenticationProvider customAuthenticationProvider) throws  Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/users/**").permitAll()
-                                .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                )
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/login").permitAll();
+
+                    auth.requestMatchers("/users/**").permitAll();
+
+                    auth.anyRequest().authenticated(); }
+                )
+                .oauth2ResourceServer(oauth2Rs -> oauth2Rs.jwt(Customizer.withDefaults()))
                 .httpBasic(Customizer.withDefaults())
                 .authenticationProvider(customAuthenticationProvider)
                 .build();
     }
 
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder(
-                10);
-    }
 
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults() {
