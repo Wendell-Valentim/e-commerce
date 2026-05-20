@@ -22,6 +22,7 @@ public class GatewayApplication {
 				.route(r -> r.path("/pedidos/**").uri("lb://mspedido"))
 				.route(r -> r.path("/users/**").uri("lb://msuser"))
 				.route(r -> r.path("/clients/**").uri("lb://msuser"))
+				.route(r -> r.path("/oauth2/**").uri("lb://msuser"))
 				.build();
 	}
 
