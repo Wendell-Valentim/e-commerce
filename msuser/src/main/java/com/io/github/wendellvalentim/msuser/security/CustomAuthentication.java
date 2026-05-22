@@ -12,8 +12,11 @@ import java.util.stream.Collectors;
 
 public class CustomAuthentication implements Authentication {
     private final IdentificacaoUsuario identificacaoUsuario;
+    private boolean authenticated = true;
 
     public CustomAuthentication(IdentificacaoUsuario identificacaoUsuario) {
+        System.out.println("=== [CUSTOM AUTH] 🏗️ CONSTRUTOR CHAMADO ===");
+        System.out.println("[CUSTOM AUTH] O DTO recebido no construtor é nulo? " + (identificacaoUsuario == null ? "SIM 🚨" : "NÃO"));
         if(identificacaoUsuario == null){
             throw new ExceptionInInitializerError("Não é possível criar um customauthentication sem a identificacao do usuario");
         }
@@ -24,6 +27,20 @@ public class CustomAuthentication implements Authentication {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        System.out.println("=== [CUSTOM AUTH] 🛡️ SPRING PEDIU AS AUTHORITIES (ROLES) ===");
+
+        if (this.identificacaoUsuario == null) {
+            System.out.println("❌ [CUSTOM AUTH ERRO] Impedido crash 500: identificacaoUsuario está NULO!");
+            return List.of();
+        }
+
+        if (this.identificacaoUsuario.roles() == null) {
+            System.out.println("❌ [CUSTOM AUTH ERRO] Impedido crash 500: A lista de roles dentro do DTO está NULA!");
+            return List.of();
+        }
+
+        System.out.println("[CUSTOM AUTH] Mapeando as seguintes roles para o Spring Security: " + this.identificacaoUsuario.roles());
+
         return this.identificacaoUsuario.roles()
                 .stream()
                 .map(role -> new SimpleGrantedAuthority(role))
@@ -37,7 +54,7 @@ public class CustomAuthentication implements Authentication {
 
     @Override
     public @Nullable Object getDetails() {
-        return null;
+        return this.identificacaoUsuario;
     }
 
     @Override
@@ -47,12 +64,14 @@ public class CustomAuthentication implements Authentication {
 
     @Override
     public boolean isAuthenticated() {
-        return true;
+        return this.authenticated;
     }
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-        throw new IllegalArgumentException("Nao precisa chamar, ja estamos autenticados");
+        // 💡 REMOVA O THROW! Deixe o Spring alterar o estado se ele precisar durante o ciclo de vida.
+        this.authenticated = isAuthenticated;
+        System.out.println("🔄 [CUSTOM AUTH] Spring alterou o estado de autenticação para: " + isAuthenticated);
     }
 
     @Override

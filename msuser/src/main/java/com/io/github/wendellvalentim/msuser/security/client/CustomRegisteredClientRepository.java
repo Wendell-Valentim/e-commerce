@@ -30,24 +30,42 @@ public class CustomRegisteredClientRepository implements RegisteredClientReposit
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
+        System.out.println("====== INICIANDO VERIFICAÇÃO DE CLIENTE NO OAUTH2 ======");
+        System.out.println("Client solicitado pelo Postman: " + clientId);
         var client = clientService.obterPorClientId(clientId);
 
         if(client == null) {
+            System.out.println("ALERTA: Cliente não foi encontrado no banco de dados!");
             return null;
         }
 
+        System.out.println("Cliente achado no banco! URL de Redirecionamento cadastrada: " + client.getRedirectURI());
+        System.out.println("Escopos brutos vindos do banco: " + client.getScope());
 
-        return RegisteredClient
+        // 1. Instancia o Builder com os dados básicos
+        var builder = RegisteredClient
                 .withId(client.getId().toString())
                 .clientId(client.getClientId())
                 .clientSecret(client.getClientSecret())
                 .redirectUri(client.getRedirectURI())
-                .scope(client.getScope())
+                // 💡 Garante os métodos de autenticação necessários para o Postman
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                // 💡 Garante os três fluxos fundamentais do ciclo do Authorization Code
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .tokenSettings(tokenSettings)
-                .clientSettings(clientSettings)
-                .build();
+                .clientSettings(clientSettings);
+
+        // 2. 💡 CORREÇÃO DOS ESCOPOS: Trata a string separada por vírgula do banco
+        if (client.getScope() != null && !client.getScope().isBlank()) {
+            String[] scopes = client.getScope().split(",");
+            for (String scope : scopes) {
+                builder.scope(scope.trim()); // Adiciona cada escopo individualmente de forma limpa
+            }
+        }
+
+        return builder.build();
     }
 }
