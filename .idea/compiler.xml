@@ -24,7 +24,7 @@
         </processorPath>
         <module name="mspedido" />
       </profile>
-      <profile name="Annotation profile for msuser" enabled="true">
+      <profile name="Annotation profile for msauth" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -33,14 +33,19 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
+        <module name="msauth" />
         <module name="msuser" />
         <module name="msproduto" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="msuser" target="25" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="eurekaserver" options="-parameters" />
+      <module name="msauth" options="-parameters" />
       <module name="mscloudgateway" options="-parameters" />
       <module name="mspedido" options="-parameters" />
       <module name="msproduto" options="-parameters" />

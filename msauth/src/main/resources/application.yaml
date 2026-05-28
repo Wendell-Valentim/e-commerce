@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: msauth
+  rabbitmq:
+    host: localhost
+    port: 5673
+    username: guest
+    password: guest
+  datasource:
+    url: jdbc:postgresql://localhost:5432/msuser
+    username: admin
+    password: 123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+server:
+  port: 8087
+eureka:
+  client:
+    service-url:
+      defaultZone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+springdoc:
+  override-with-generic-response: false
+app:
+  security:
+    issuer: http://localhost:8087
