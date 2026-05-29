@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: msuser
+  datasource:
+    url: jdbc:postgresql://localhost:5432/msuser
+    username: admin
+    password: 123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8087
+server:
+  port: 8088
+eureka:
+  client:
+    service-url:
+      defaultZone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+springdoc:
+  override-with-generic-response: false

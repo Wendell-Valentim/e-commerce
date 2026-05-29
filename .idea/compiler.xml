@@ -24,7 +24,7 @@
         </processorPath>
         <module name="mspedido" />
       </profile>
-      <profile name="Annotation profile for msauth" enabled="true">
+      <profile name="Annotation profile for msuser" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -38,9 +38,6 @@
         <module name="msproduto" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="msuser" target="25" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
