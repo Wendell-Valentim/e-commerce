@@ -34,4 +34,9 @@ public class UserService {
 
         return userRepository.save(userEntity);
     }
+
+    public UserEntity pesquisarPorSub(String sub) {
+        return userRepository.findBySub(sub).orElseThrow(
+                () -> new RuntimeException("Usuario não encontrado para o SUBJECT!"));
+    }
 }
