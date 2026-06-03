@@ -15,9 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -45,9 +48,14 @@ public class PedidoController implements GenericController {
 
 
     })
-    public ResponseEntity<Object> criar(@RequestBody @Valid PedidoRequestDTO requestDTO) {
-        Pedido pedido = service.salvar(requestDTO);
+    public ResponseEntity<Object> criar(@RequestBody @Valid PedidoRequestDTO requestDTO,
+    @AuthenticationPrincipal Jwt jwt) {
+        String userSub = jwt.getSubject();
+
+        Pedido pedido = service.salvar(requestDTO, userSub);
+
         URI location = gerarHeaderLocation(pedido.getId());
+
         return ResponseEntity.created(location).build();
     }
 
@@ -59,7 +67,7 @@ public class PedidoController implements GenericController {
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado!"),
 
     })
-    public ResponseEntity<PedidoResponseDTO> buscar(@PathVariable UUID id) {
+    public ResponseEntity<PedidoResponseDTO> buscar(@PathVariable UUID id){
         PedidoResponseDTO dto = mapper.toDTO(service.buscarPorId(id));
 
         return ResponseEntity.ok(dto);
@@ -79,7 +87,7 @@ public class PedidoController implements GenericController {
                     "5. Status não permitido para cancelamento"),
 
     })
-    public ResponseEntity<PedidoResponseDTO> cancelar(@PathVariable UUID id) {
+    public ResponseEntity<PedidoResponseDTO> cancelar(@PathVariable UUID id){
 
         PedidoResponseDTO pedidoCancelado = mapper.toDTO(service.solicitarCancelamentoPedido(id));
 
@@ -102,10 +110,18 @@ public class PedidoController implements GenericController {
                                                              @RequestParam(value = "pagina", defaultValue = "0")
                                                              Integer pagina,
                                                              @RequestParam(value = "tamanho-pagina",defaultValue = "10")
-                                                             Integer tamanhoPagina) {
+                                                             Integer tamanhoPagina,
+                                                             @AuthenticationPrincipal Jwt jwt) {
 
-        Page<Pedido> pedidosPage = service.pesquisa(codigo, nomeProduto, dataBusca, pagina, tamanhoPagina);
+        boolean isAdmin = jwt.getClaimAsStringList("roles") != null
+                && jwt.getClaimAsStringList("roles").contains("ROLE_ADMIN");
+
+        String userSub = isAdmin ? null : jwt.getSubject();
+
+        Page<Pedido> pedidosPage = service.pesquisa(codigo, nomeProduto, dataBusca, userSub, pagina, tamanhoPagina);
+
         Page<PedidoResponseDTO> resultado = pedidosPage.map(mapper::toDTO);
+
         return ResponseEntity.ok(resultado);
     }
 

@@ -27,6 +27,9 @@ public class Pedido {
     private String codigoPedido;
 
     @Column(nullable = false)
+    private String userSub;
+
+    @Column(nullable = false)
     private BigDecimal total;
 
     @Column(nullable = false)

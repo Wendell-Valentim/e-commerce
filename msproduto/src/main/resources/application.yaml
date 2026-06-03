@@ -8,12 +8,12 @@ spring:
     password: guest
   datasource:
     url: jdbc:postgresql://localhost:5432/msproduto
-    username: postgres
+    username: admin
     password: 123
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:

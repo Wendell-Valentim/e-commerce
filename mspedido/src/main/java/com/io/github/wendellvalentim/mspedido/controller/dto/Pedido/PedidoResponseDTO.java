@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record PedidoResponseDTO(String codigoPedido,
+                                String userSub,
                                 StatusPedido status,
                                 @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
                                 LocalDateTime dataPedido,

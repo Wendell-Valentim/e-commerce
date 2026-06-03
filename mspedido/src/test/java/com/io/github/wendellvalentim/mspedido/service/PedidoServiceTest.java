@@ -1,6 +1,5 @@
 package com.io.github.wendellvalentim.mspedido.service;
 
-
 import com.io.github.wendellvalentim.mspedido.controller.dto.ItemPedido.ItemPedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.controller.dto.Pedido.PedidoRequestDTO;
 import com.io.github.wendellvalentim.mspedido.enums.StatusPedido;
@@ -67,6 +66,8 @@ public class PedidoServiceTest {
     ItemPedidoRequestDTO itemPedidoRequestDTO;
     PedidoRequestDTO pedidoRequestDTO;
 
+    // 🎯 String padrão de sub para usar em todos os testes do salvar
+    final String SUB_TESTE = "f81d4fae-7dec-11d0-a765-00a0c91e6bf6";
 
     @BeforeEach
     void setUp() {
@@ -98,13 +99,11 @@ public class PedidoServiceTest {
         pedido.setStatus(StatusPedido.APROVADO);
         pedido.setItems(List.of(itemPedido));
         pedido.setTotal(new BigDecimal("200.00"));
-
     }
 
     @Test
     @DisplayName("Deve salvar um pedido com sucesso")
     void deveSalvarPedidoComSucesso() {
-
         when(produtoResourceClient.getProdutosById(any()))
                 .thenReturn(ResponseEntity.ok(produtoResponseDTO));
 
@@ -114,33 +113,27 @@ public class PedidoServiceTest {
         when(pedidoRepository.save(any()))
                 .thenReturn(pedido);
 
-
-        Pedido pedidoSalvo = pedidoService.salvar(pedidoRequestDTO);
-
+        Pedido pedidoSalvo = pedidoService.salvar(pedidoRequestDTO, SUB_TESTE);
 
         assertNotNull(pedidoSalvo);
         assertEquals(StatusPedido.APROVADO, pedidoSalvo.getStatus());
         assertEquals(new BigDecimal("200.00"), pedidoSalvo.getTotal());
 
-
         verify(produtoPublisher, times(1)).abaixarEstoqueProduto(any());
     }
-
 
     @Test
     @DisplayName("Deve dar erro quando o ProdutoId for nulo")
     void deveLancarErroProdutoIdNulo() {
-
         when(produtoResourceClient.getProdutosById(any())).thenReturn(ResponseEntity.ok(produtoResponseDTO));
 
         doThrow(new IllegalArgumentException("produtoId não pode ser nulo"))
                 .when(produtoValidator).validar(itemPedidoRequestDTO, produtoResponseDTO);
 
-        assertThrows(IllegalArgumentException.class, () -> pedidoService.salvar(pedidoRequestDTO));
+        assertThrows(IllegalArgumentException.class, () -> pedidoService.salvar(pedidoRequestDTO, SUB_TESTE));
 
         verify(pedidoRepository, never()).save(any());
     }
-
 
     @Test
     @DisplayName("Deve dar erro de Estoque insuficiente")
@@ -153,7 +146,7 @@ public class PedidoServiceTest {
         doThrow(new EstoqueInsuficienteException("Estoque insuficiente"))
                 .when(produtoValidator).validar(itemPedidoRequestDTO, semEstoque);
 
-        assertThrows(EstoqueInsuficienteException.class, () -> pedidoService.salvar(pedidoRequestDTO));
+        assertThrows(EstoqueInsuficienteException.class, () -> pedidoService.salvar(pedidoRequestDTO, SUB_TESTE));
 
         verify(pedidoRepository, never()).save(any());
     }
@@ -161,7 +154,6 @@ public class PedidoServiceTest {
     @Test
     @DisplayName("Deve dar erro com um valor abaixo do minimo")
     void deveDarErroComValorAbaixoDoMinimo() {
-
         when(produtoResourceClient.getProdutosById(any())).thenReturn(ResponseEntity.ok(produtoResponseDTO));
         when(itemPedidoMapper.toEntity(any())).thenReturn(itemPedido);
 
@@ -169,9 +161,8 @@ public class PedidoServiceTest {
                 pedidoRequestDTO, new BigDecimal("200.00")
         );
 
-        assertThrows(ValorMinimoException.class, () -> pedidoService.salvar(pedidoRequestDTO));
+        assertThrows(ValorMinimoException.class, () -> pedidoService.salvar(pedidoRequestDTO, SUB_TESTE));
     }
-
 
     @Test
     @DisplayName("Deve lançar erro quando a lista de itens estiver vazia")
@@ -181,7 +172,7 @@ public class PedidoServiceTest {
         doThrow(new CampoInvalidoException("O pedido deve ter pelo menos um item."))
                 .when(pedidoValidator).validarNovoPedido(eq(requestSemItens), eq(BigDecimal.ZERO));
 
-        assertThrows(CampoInvalidoException.class, () -> pedidoService.salvar(requestSemItens));
+        assertThrows(CampoInvalidoException.class, () -> pedidoService.salvar(requestSemItens, SUB_TESTE));
 
         verifyNoInteractions(produtoResourceClient);
     }
@@ -189,16 +180,18 @@ public class PedidoServiceTest {
     @Test
     @DisplayName("Deve lançar erro Quando o serviço de produtos falhar")
     void deveLancarErroQuandoServicoProdutoFalhar() {
-
         when(produtoResourceClient.getProdutosById(any())).thenThrow(new RuntimeException("Servico Indisponivel!"));
 
-        assertThrows(RuntimeException.class, () -> pedidoService.salvar(pedidoRequestDTO));
+        assertThrows(RuntimeException.class, () -> pedidoService.salvar(pedidoRequestDTO, SUB_TESTE));
     }
 
     @Test
     @DisplayName("Deve retornar um Pedido")
     void DeveRetornarUmPedidoPorId() {
         when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
+
+        // 🛡️ Como a service agora chama o validador interno por id, precisamos dizer pro mock não fazer nada
+        doNothing().when(pedidoValidator).validarPropriedadePedido(any());
 
         Pedido pedidoEncontrado = pedidoService.buscarPorId(pedido.getId());
 
@@ -216,9 +209,7 @@ public class PedidoServiceTest {
         assertThrows(PedidoNaoEncontradoException.class, () -> pedidoService.buscarPorId(pedido.getId()));
 
         verify(pedidoRepository, times(1)).findById(pedido.getId());
-
     }
-
 
     @Test
     @DisplayName("Deve abaixar o estoque")
@@ -244,21 +235,20 @@ public class PedidoServiceTest {
         pedidoService.aumentarEstoque(eventoEsperado);
 
         verify(produtoPublisher, times(1)).aumentarEstoqueProduto(refEq(eventoEsperado));
-
     }
 
     @Test
     @DisplayName("Efetuar cancelamento do pedido")
     void deveEfetuarOCancelamentoDoPedido() {
         when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
-
         when(pedidoRepository.save(any(Pedido.class))).thenReturn(pedido);
 
+        // 🛡️ Ignora a validação de propriedade do dono dentro do buscarPorId
+        doNothing().when(pedidoValidator).validarPropriedadePedido(any());
 
         Pedido pedidoSalvo = pedidoService.solicitarCancelamentoPedido(pedido.getId());
 
         assertNotNull(pedidoSalvo);
-
         assertEquals(StatusPedido.CANCELADO, pedidoSalvo.getStatus());
 
         verify(pedidoRepository, times(1)).save(pedidoSalvo);
@@ -269,19 +259,13 @@ public class PedidoServiceTest {
     void deveLancarErroAoAlteraroStatusDoPedido() {
         when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
 
-        Pedido pedidoEncontrado = pedidoService.buscarPorId(pedido.getId());
+        // 🛡️ Ignora a validação de propriedade do dono dentro do buscarPorId
+        doNothing().when(pedidoValidator).validarPropriedadePedido(any());
 
-        doThrow(new NaoEPossivelCancelarException(
-                "Não é possível cancelar o pedido! Status atual:" + pedidoEncontrado.getStatus()))
-                .when(pedidoValidator).validarCancelamento(pedidoEncontrado);
+        doThrow(new NaoEPossivelCancelarException("Não é possível cancelar o pedido!"))
+                .when(pedidoValidator).validarCancelamento(any());
 
         assertThrows(NaoEPossivelCancelarException.class,
-                () -> pedidoService.solicitarCancelamentoPedido(pedidoEncontrado.getId()));
-
+                () -> pedidoService.solicitarCancelamentoPedido(pedido.getId()));
     }
-
-
-    }
-
-
-
+}

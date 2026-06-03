@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -41,10 +42,11 @@ public class PedidoService {
     private final PedidoValidator pedidoValidator;
 
     @Transactional
-    public Pedido salvar (PedidoRequestDTO request) {
+    public Pedido salvar (PedidoRequestDTO request, String userSub) {
         Pedido pedido = new Pedido();
         pedido.setCodigoPedido(UUID.randomUUID().toString());
         pedido.setStatus(StatusPedido.RECEBIDO);
+        pedido.setUserSub(userSub);
         List<ItemPedido> listaDeItens = request.itens().stream().map(itemDTO -> {
 
             ResponseEntity<ProdutoResponseDTO> response = produtoResourceClient.getProdutosById(itemDTO.produtoId());
@@ -82,8 +84,14 @@ public class PedidoService {
         return pedidoSalvo;
     }
 
-    public Pedido buscarPorId(UUID id) {
-        return pedidoRepository.findById(id).orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+    public Pedido buscarPorId(UUID id)  {
+
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado!"));
+
+        pedidoValidator.validarPropriedadePedido(pedido);
+
+        return pedido;
     }
 
     public void solicitarBaixaDoEstoque(PedidoCriadoEvent event) {
@@ -98,7 +106,7 @@ public class PedidoService {
 
 
     @Transactional
-    public Pedido solicitarCancelamentoPedido(UUID id) {
+    public Pedido solicitarCancelamentoPedido(UUID id)  {
        Pedido pedidoEncontrado = buscarPorId(id);
 
         pedidoValidator.validarCancelamento(pedidoEncontrado);
@@ -119,8 +127,10 @@ public class PedidoService {
     public Page<Pedido> pesquisa(String codPedido,
                                  String nomeProduto,
                                  LocalDate dataBusca,
+                                 String usersub,
                                  Integer pagina,
-                                 Integer tamanhoPagina) {
+                                 Integer tamanhoPagina
+                                 ) {
 
         Specification<Pedido> specs = Specification.where((root, query, cb) ->
                 cb.conjunction());
@@ -134,6 +144,10 @@ public class PedidoService {
 
         if(dataBusca != null) {
             specs = specs.and(dataPedidoEqual(dataBusca));
+        }
+
+        if(usersub != null) {
+            specs = specs.and(subUserEqual(usersub));
         }
 
         Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);

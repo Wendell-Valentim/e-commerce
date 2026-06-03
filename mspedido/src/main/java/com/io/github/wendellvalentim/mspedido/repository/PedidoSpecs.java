@@ -17,6 +17,11 @@ public class PedidoSpecs {
                 "%" + codPedido.toUpperCase() + "%");
     }
 
+    public static Specification<Pedido> subUserEqual(String userSub) {
+        return (root, query, cb) -> cb.equal(root.get("userSub"),
+                userSub);
+    }
+
     public static Specification<Pedido> nomeProdutoLike(String nomeProduto) {
         return (root, query, cb) -> {
             if (nomeProduto == null || nomeProduto.isBlank()) return null;

@@ -9,5 +9,6 @@ import java.util.List;
 public record PedidoRequestDTO(
         @NotNull
         @NotEmpty
-        List<ItemPedidoRequestDTO> itens) {
+        List<ItemPedidoRequestDTO> itens
+        ) {
 }

@@ -18,24 +18,11 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
         <module name="mspedido" />
-      </profile>
-      <profile name="Annotation profile for msuser" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
-        </processorPath>
-        <module name="msauth" />
         <module name="msuser" />
         <module name="msproduto" />
+        <module name="msauth" />
       </profile>
     </annotationProcessing>
   </component>

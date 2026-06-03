@@ -8,9 +8,12 @@ import com.io.github.wendellvalentim.mspedido.exception.NaoEPossivelCancelarExce
 import com.io.github.wendellvalentim.mspedido.exception.ValorMinimoException;
 import com.io.github.wendellvalentim.mspedido.model.Pedido;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 @Component
@@ -18,7 +21,32 @@ import java.util.List;
 public class  PedidoValidator {
     private BigDecimal VALOR_MINIMO = BigDecimal.valueOf(0);
 
+    private Jwt getJwtUsuarioLogado() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            return jwt;
+        }
+        throw new AccessDeniedException("Usuário não autenticado.");
+    }
+
+    public void validarPropriedadePedido(Pedido pedido)  {
+        Jwt jwt = getJwtUsuarioLogado();
+
+        String userSub = jwt.getSubject();
+        List<String> roles = jwt.getClaimAsStringList("roles");
+
+        boolean isAdmin = roles != null && roles.contains("ROLE_ADMIN");
+
+        if (!isAdmin && !pedido.getUserSub().equals(userSub)) {
+            throw new AccessDeniedException("Você não tem permissão para acessar este pedido.");
+        }
+
+    }
+
     public void validarCancelamento(Pedido pedido) {
+
+        validarPropriedadePedido(pedido);
+
         if(validarStatus(pedido.getStatus())) {
             throw new NaoEPossivelCancelarException(
                     "Não é possível cancelar o pedido! Status atual: " + pedido.getStatus());
