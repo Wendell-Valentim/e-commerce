@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -87,6 +88,7 @@ public class PedidoController implements GenericController {
                     "5. Status não permitido para cancelamento"),
 
     })
+    @PreAuthorize("hasAuthority('ROLE_CLIENT')")
     public ResponseEntity<PedidoResponseDTO> cancelar(@PathVariable UUID id){
 
         PedidoResponseDTO pedidoCancelado = mapper.toDTO(service.solicitarCancelamentoPedido(id));

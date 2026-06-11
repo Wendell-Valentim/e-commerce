@@ -2,14 +2,14 @@ spring:
   application:
     name: mspedido
   rabbitmq:
-    host: localhost
+    host: ${RABBITMQ_SERVER:localhost}
     port: 5673
-    username: guest
-    password: guest
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   datasource:
-    url: jdbc:postgresql://localhost:5432/mspedido
+    url: jdbc:postgresql://${DB_SERVER:localhost}:5432/mspedido
     username: admin
-    password: 123
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -22,13 +22,24 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8087
+          issuer-uri: http://${MSAUTH_SERVER:localhost}:8085
+      client:
+        registration:
+          mspedido-client:
+            provider: spring-auth-server
+            client-id: ${MSPEDIDO_CLIENT_ID}
+            client-secret: ${MSPEDIDO_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: internal
+        provider:
+          spring-auth-server:
+            token-uri: http://${MSAUTH_SERVER:localhost}:8087/oauth2/token
 server:
   port: 0
 eureka:
   client:
     service-url:
-      defaultzone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
+      defaultZone: http://${EUREKA_SERVER:localhost}:8761/eureka
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 springdoc:
@@ -39,8 +50,6 @@ mq:
     produto:
       v1:
         pedido-criado:
-          estoque-baixa: produto.v1.pedido-criado.estoque-baixa
+          estoque-baixa: ${MQ_PEDIDO_CRIADO:produto.v1.pedido-criado.estoque-baixa}
         pedido-cancelado:
-          estoque-repor: produto.v1.pedido-cancelado.estoque-repor
-
-
+          estoque-repor: ${MQ_PEDIDO_CANCELADO:produto.v1.pedido-cancelado.estoque-repor}

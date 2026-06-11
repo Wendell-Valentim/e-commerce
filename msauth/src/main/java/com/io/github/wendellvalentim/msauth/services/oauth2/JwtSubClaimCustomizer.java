@@ -28,6 +28,9 @@ public class JwtSubClaimCustomizer implements OAuth2TokenCustomizer<JwtEncodingC
                     .collect(Collectors.toSet());
 
             context.getClaims().claim("roles", roles);
+
+            Set<String> scopes = context.getAuthorizedScopes();
+            context.getClaims().claim("scope", scopes);
         }
     }
 }

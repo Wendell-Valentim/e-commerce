@@ -4,15 +4,24 @@ spring:
   cloud:
     gateway:
       discovery:
-        locato:
+        locator:
           enabled: true
           lower-case-service-id: true
+      forwarded:
+        enabled: true
+      x-forwarded:
+        enabled: true
+        for-enabled: true
+        host-enabled: true
+        port-enabled: true
+        proto-enabled: true
+
 server:
   port: 8085
 
 eureka:
   client:
-    tech-registry: true
+    fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultzone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
+      defaultZone: http://${EUREKA_SERVER:localhost}:8761/eureka

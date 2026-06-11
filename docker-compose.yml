@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+
+  eureka-server:
+    build: ./eurekaserver
+    container_name: eureka-container
+    ports:
+      - "8761:8761"
+    networks:
+      - rede-infra-existente
+
+  msauth:
+    build: ./msauth
+    container_name: msauth-container
+    ports:
+      - "8087:8087"
+    environment:
+      - EUREKA_SERVER=eureka-container
+      - DB_SERVER=pg-ecommerce
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MSAUTH_SERVER=msauth-container
+      - APP_SECURITY_ISSUER=http://msauth-container:8087
+    depends_on:
+      - eureka-server
+    networks:
+      - rede-infra-existente
+
+  msuser:
+    build: ./msuser
+    container_name: msuser-container
+    environment:
+      - EUREKA_SERVER=eureka-container
+      - DB_SERVER=pg-ecommerce
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - eureka-server
+    networks:
+      - rede-infra-existente
+
+  msproduto:
+    build: ./msproduto
+    container_name: msproduto-container
+    environment:
+      - EUREKA_SERVER=eureka-container
+      - DB_SERVER=pg-ecommerce
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MSAUTH_SERVER=msauth-container
+      - RABBITMQ_SERVER=rabbitmq-ecommerce
+      - RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+    depends_on:
+      - eureka-server
+      - msauth
+    networks:
+      - rede-infra-existente
+
+  mspedido:
+    build: ./mspedido
+    container_name: mspedido-container
+    environment:
+      - EUREKA_SERVER=eureka-container
+      - DB_SERVER=pg-ecommerce
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MSAUTH_SERVER=msauth-container
+      # 🎯 ADICIONE ESSA LINHA PARA FORÇAR A PORTA INTERNA CERTA:
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://msauth-container:8087
+      - RABBITMQ_SERVER=rabbitmq-ecommerce
+      - RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - MSPEDIDO_CLIENT_ID=${MSPEDIDO_CLIENT_ID}
+      - MSPEDIDO_CLIENT_SECRET=${MSPEDIDO_CLIENT_SECRET}
+    depends_on:
+      - eureka-server
+      - msauth
+    networks:
+      - rede-infra-existente
+
+  mscloudgateway:
+    build: ./mscloudgateway
+    container_name: mscloudgateway-container
+    ports:
+      - "8085:8085"
+    environment:
+      - EUREKA_SERVER=eureka-container
+    depends_on:
+      - eureka-server
+    networks:
+      - rede-infra-existente
+
+networks:
+  rede-infra-existente:
+    external: true
+    name: ecommerce-net

@@ -2,9 +2,9 @@ spring:
   application:
     name: msuser
   datasource:
-    url: jdbc:postgresql://localhost:5432/msuser
+    url: jdbc:postgresql://${DB_SERVER:localhost}:5432/msuser
     username: admin
-    password: 123
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -18,13 +18,13 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8087
+          issuer-uri: http://${MSAUTH_SERVER:localhost}:8085
 server:
-  port: 8088
+  port: 0
 eureka:
   client:
     service-url:
-      defaultZone: http://cursoms-eureka-user:cursoms-eureka-user@localhost:8761/eureka
+      defaultZone: http://${EUREKA_SERVER:localhost}:8761/eureka
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 springdoc:

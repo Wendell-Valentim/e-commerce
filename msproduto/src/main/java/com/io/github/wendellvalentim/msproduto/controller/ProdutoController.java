@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -36,6 +37,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
             @ApiResponse(responseCode = "400", description = "Codigo de produto ja Cadastrado!")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> salvar (@Valid @RequestBody ProdutoCreatedDTO request) {
         Produto produto = produtoService.salvar(request);
             URI location = gerarHeaderLocation(produto.getId());
@@ -49,6 +51,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado!")
 
     })
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN') or hasAuthority('SCOPE_internal')")
     public ResponseEntity<ProdutoResponseDTO> obterDetalhes (@PathVariable("id")UUID id){
        var produtoDTO = mapper.toDTO(produtoService.buscar(id));
 
@@ -62,6 +65,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado!"),
             @ApiResponse(responseCode = "400", description = "Codigo de produto ja Cadastrado!")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProdutoResponseDTO> atualizar(@PathVariable("id") UUID id,
                                                         @Valid @RequestBody ProdutoUpdateDTO request) {
         Produto prodAtualizado = produtoService.atualizar(id,request);
@@ -75,6 +79,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "204", description = "Deletado com sucesso!"),
             @ApiResponse(responseCode = "404", description = "Produto não encontrado!")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletar(@PathVariable("id") UUID id) {
         produtoService.deletar(id);
         return ResponseEntity.noContent().build();
@@ -86,6 +91,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "200", description = "Sucesso.")
 
     })
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN') or hasAuthority('SCOPE_internal')")
     public ResponseEntity<Page<ProdutoResponseDTO>> pesquisar(@RequestParam(value = "nome", required = false)
                                                              String nome,
                                                              @RequestParam(value = "preco", required = false)
@@ -109,6 +115,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado!"),
             @ApiResponse(responseCode = "400", description = "Erro ao diminuir o estoque!")
     })
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('SCOPE_internal')")
     public ResponseEntity<EstoqueResponseDTO> diminuirEstoque
             (       @PathVariable(name = "id",required = true) UUID id,
                     @Valid @RequestBody EstoqueUpdateDTO request
@@ -128,6 +135,7 @@ public class ProdutoController implements GenericController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado!"),
             @ApiResponse(responseCode = "400", description = "Erro ao aumentar o estoque!")
     })
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('SCOPE_internal')")
     public ResponseEntity<EstoqueResponseDTO> aumentarEstoque (
             @PathVariable(name = "id", required = true) UUID id,
             @Valid @RequestBody EstoqueUpdateDTO request

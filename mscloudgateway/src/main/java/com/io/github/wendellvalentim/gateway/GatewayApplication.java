@@ -21,8 +21,16 @@ public class GatewayApplication {
 				.route(r -> r.path("/produtos/**").uri("lb://msproduto"))
 				.route(r -> r.path("/pedidos/**").uri("lb://mspedido"))
 				.route(r -> r.path("/users/**").uri("lb://msuser"))
-				.route(r -> r.path("/clients/**").uri("lb://msuser"))
-				.route(r -> r.path("/oauth2/**").uri("lb://msuser"))
+				.route(r -> r.path("/clients/**").uri("lb://msauth"))
+
+				// 🎯 UNIFICADO: Agrupamos todas as rotas de autenticação e assets em uma única expressão condicional foda!
+				.route(r -> r.path("/oauth2/**", "/login/**", "/.well-known/**", "/css/**", "/js/**")
+						.filters(f -> f
+								.addRequestHeader("X-Forwarded-Host", "localhost:8085")
+								.addRequestHeader("X-Forwarded-Proto", "http")
+								.addRequestHeader("X-Forwarded-Port", "8085")
+						)
+						.uri("lb://msauth"))
 				.build();
 	}
 
