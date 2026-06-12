@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_SERVER:localhost}:5432/msuser
     username: admin
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -16,7 +16,6 @@ spring:
         format_sql: true
 server:
   port: 8087
-  forward-headers-strategy: framework
 eureka:
   client:
     service-url:
@@ -27,4 +26,4 @@ springdoc:
   override-with-generic-response: false
 app:
   security:
-    issuer: http://${MSAUTH_SERVER:localhost}:8085
+    issuer: http://${MSAUTH_SERVER:localhost}:8087

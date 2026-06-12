@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_SERVER:localhost}:5432/msuser
     username: admin
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -18,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${MSAUTH_SERVER:localhost}:8085
+          issuer-uri: http://${MSAUTH_SERVER:localhost}:8087
 server:
   port: 0
 eureka:
