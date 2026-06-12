@@ -13,14 +13,12 @@ services:
   msauth:
     build: ./msauth
     container_name: msauth-container
-    ports:
-      - "8087:8087"
+
     environment:
       - EUREKA_SERVER=eureka-container
       - DB_SERVER=pg-ecommerce
       - DB_PASSWORD=${DB_PASSWORD}
-      - MSAUTH_SERVER=msauth-container
-      - APP_SECURITY_ISSUER=http://msauth-container:8087
+      - MSAUTH_SERVER=mscloudgateway:8085
     depends_on:
       - eureka-server
     networks:
@@ -33,6 +31,7 @@ services:
       - EUREKA_SERVER=eureka-container
       - DB_SERVER=pg-ecommerce
       - DB_PASSWORD=${DB_PASSWORD}
+      - MSAUTH_SERVER=mscloudgateway:8085
     depends_on:
       - eureka-server
     networks:
@@ -45,10 +44,11 @@ services:
       - EUREKA_SERVER=eureka-container
       - DB_SERVER=pg-ecommerce
       - DB_PASSWORD=${DB_PASSWORD}
-      - MSAUTH_SERVER=msauth-container
+      - MSAUTH_SERVER=mscloudgateway:8085
       - RABBITMQ_SERVER=rabbitmq-ecommerce
       - RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_PORT=5672
     depends_on:
       - eureka-server
       - msauth
@@ -62,10 +62,11 @@ services:
       - EUREKA_SERVER=eureka-container
       - DB_SERVER=pg-ecommerce
       - DB_PASSWORD=${DB_PASSWORD}
-      - MSAUTH_SERVER=msauth-container
+      - MSAUTH_SERVER=mscloudgateway:8085
       - RABBITMQ_SERVER=rabbitmq-ecommerce
       - RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_PORT=5672
       - MSPEDIDO_CLIENT_ID=${MSPEDIDO_CLIENT_ID}
       - MSPEDIDO_CLIENT_SECRET=${MSPEDIDO_CLIENT_SECRET}
     depends_on:

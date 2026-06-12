@@ -3,7 +3,7 @@ spring:
     name: msproduto
   rabbitmq:
     host: ${RABBITMQ_SERVER:localhost}
-    port: 5673
+    port: ${RABBITMQ_PORT:5673}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
   datasource:
@@ -22,7 +22,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${MSAUTH_SERVER:localhost}:8087
+          issuer-uri: http://${MSAUTH_SERVER:localhost:8087}
 server:
   port: 0
 eureka:

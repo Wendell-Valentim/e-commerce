@@ -15,7 +15,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 server:
-  port: 8087
+  port: 0
+  forward-headers-strategy: framework
 eureka:
   client:
     service-url:
@@ -26,4 +27,4 @@ springdoc:
   override-with-generic-response: false
 app:
   security:
-    issuer: http://${MSAUTH_SERVER:localhost}:8087
+    issuer: http://${MSAUTH_SERVER:localhost:8087}

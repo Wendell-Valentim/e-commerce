@@ -18,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${MSAUTH_SERVER:localhost}:8087
+          issuer-uri: http://${MSAUTH_SERVER:localhost:8087}
 server:
   port: 0
 eureka:
