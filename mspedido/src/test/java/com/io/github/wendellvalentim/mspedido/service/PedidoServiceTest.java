@@ -66,7 +66,7 @@ public class PedidoServiceTest {
     ItemPedidoRequestDTO itemPedidoRequestDTO;
     PedidoRequestDTO pedidoRequestDTO;
 
-    // 🎯 String padrão de sub para usar em todos os testes do salvar
+
     final String SUB_TESTE = "f81d4fae-7dec-11d0-a765-00a0c91e6bf6";
 
     @BeforeEach
@@ -190,7 +190,7 @@ public class PedidoServiceTest {
     void DeveRetornarUmPedidoPorId() {
         when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
 
-        // 🛡️ Como a service agora chama o validador interno por id, precisamos dizer pro mock não fazer nada
+
         doNothing().when(pedidoValidator).validarPropriedadePedido(any());
 
         Pedido pedidoEncontrado = pedidoService.buscarPorId(pedido.getId());
@@ -243,7 +243,7 @@ public class PedidoServiceTest {
         when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
         when(pedidoRepository.save(any(Pedido.class))).thenReturn(pedido);
 
-        // 🛡️ Ignora a validação de propriedade do dono dentro do buscarPorId
+
         doNothing().when(pedidoValidator).validarPropriedadePedido(any());
 
         Pedido pedidoSalvo = pedidoService.solicitarCancelamentoPedido(pedido.getId());
@@ -259,7 +259,7 @@ public class PedidoServiceTest {
     void deveLancarErroAoAlteraroStatusDoPedido() {
         when(pedidoRepository.findById(any())).thenReturn(Optional.of(pedido));
 
-        // 🛡️ Ignora a validação de propriedade do dono dentro do buscarPorId
+
         doNothing().when(pedidoValidator).validarPropriedadePedido(any());
 
         doThrow(new NaoEPossivelCancelarException("Não é possível cancelar o pedido!"))

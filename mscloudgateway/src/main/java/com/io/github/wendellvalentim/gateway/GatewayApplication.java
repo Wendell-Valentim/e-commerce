@@ -23,7 +23,7 @@ public class GatewayApplication {
 				.route(r -> r.path("/users/**").uri("lb://msuser"))
 				.route(r -> r.path("/clients/**").uri("lb://msauth"))
 
-				.route(r -> r.path("/oauth2/**", "/login/**", "/.well-known/**", "/css/**", "/js/**")
+				.route(r -> r.path("/oauth2/**", "/login/**", "/userinfo", "/.well-known/**", "/css/**", "/js/**")
 						.filters(f -> f
 								.addRequestHeader("X-Forwarded-Host", "localhost:8085")
 								.addRequestHeader("X-Forwarded-Proto", "http")

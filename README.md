@@ -1,75 +1,74 @@
-Ecossistema de Microserviços - E-commerce
-Este repositório contém um ecossistema de microserviços focado em escalabilidade e alta performance, utilizando as tecnologias mais recentes do ecossistema Java. A arquitetura foi desenhada para garantir independência entre os serviços, resiliência através de Service Discovery, roteamento centralizado via API Gateway e comunicação assíncrona via Message Broker.
+## 1. Arquitetura do Sistema e Microsserviços
 
-Arquitetura e Microserviços
-1. API Gateway (Spring Cloud Gateway)
-   Atua como o ponto de entrada único (Single Entry Point) para todo o ecossistema.
+O ecossistema é composto por microsserviços totalmente independentes, cada um possuindo seu próprio ciclo de vida, banco de dados isolado (Database-per-Service) e rodando sob uma rede virtualizada interna.
 
-Roteamento Centralizado: Direciona as requisições para os microserviços de forma transparente para o cliente.
+###  API Gateway (`mscloudgateway`)
+Atua como a porta de entrada única (**Single Entry Point**) pública do sistema na porta `8085`.
+* **Roteamento Dinâmico:** Centraliza e redireciona o tráfego para os microsserviços internos de forma transparente.
+* **Segurança e CORS:** Gerencia as permissões de compartilhamento de recursos de origens cruzadas (CORS) em um único ponto.
+* **Proxy Reverso Integrado:** Configurado com estratégias de repasse de cabeçalhos (`X-Forwarded-Host`, `X-Forwarded-Port`) para garantir a integridade de redirecionamentos de segurança vindos de dentro do Docker.
 
-Abstração de Infraestrutura: Oculta a complexidade da rede interna, expondo apenas os contratos necessários.
+###  Discovery Server (`eurekaserver`)
+Servidor de Service Discovery baseado em **Netflix Eureka**.
+* **Desacoplamento de Rede:** Gerencia o catálogo dinâmico de instâncias. Os microsserviços se localizam puramente por seus nomes lógicos, eliminando qualquer acoplamento por IPs ou portas fixas.
+* **Health Checks:** Monitora constantemente a saúde das aplicações, garantindo que o Gateway envie tráfego apenas para contêineres saudáveis.
 
-2. Discovery Server (Eureka)
-   Servidor de Service Discovery baseado em Netflix Eureka que gerencia o catálogo central da arquitetura.
+###  Authorization Server & User (`msauth` & `msuser`)
+O núcleo de segurança e identidade do ecossistema, baseado no **Spring Authorization Server** moderno e especificações **OAuth2 / OpenID Connect 1.0**.
+* **Portas Randômicas e Isolamento:** Roda em porta dinâmica interna (`server.port=0`), totalmente protegido do acesso externo direto, respondendo apenas através do Gateway.
+* **Criptografia Assimétrica (Chaves RSA):** Emite tokens JWT estruturados e autossuficientes, assinados digitalmente usando um par de chaves RSA de 2048 bits geradas em memória através de um `JWKSource` padronizado.
+* **Fluxos OAuth2 Implementados:**
+   * *Authorization Code com PKCE:* Para autenticação segura de usuários humanos com tela de login customizada.
+   * *Client Credentials:* Para autenticação segura e automática de Máquina para Máquina (M2M).
+* **Userinfo Endpoint:** Disponibiliza a rota `/userinfo` customizada via `OidcUserInfoMapper` para o fornecimento seguro de claims de perfil (nome, e-mail, foto) baseados em escopos.
 
-Desacoplamento de Rede: Permite que os serviços se localizem pelo nome lógico, eliminando dependências de IPs fixos.
+###  Módulo de Pedidos (`mspedido`)
+Responsável pela orquestração do fluxo de compras e transações financeiras.
+* **Validação Segura com Feign:** Intercepta requisições síncronas usando OpenFeign injetando tokens de sistema (`Client Credentials`) no cabeçalho para consultar e validar a existência de itens no `msproduto` de forma protegida.
+* **Extração de Identidade Global:** Lê o campo `sub` (Subject) de dentro do JWT enviado pelo usuário logado para amarrar o pedido ao ID global e imutável do comprador, mantendo o desacoplamento de banco de dados.
 
-Health Checks: Monitoramento constante para garantir que o tráfego seja direcionado apenas para instâncias saudáveis.
+###  Módulo de Produtos e Estoque (`msproduto`)
+Responsável pelo gerenciamento do catálogo de itens e controle rígido de inventário.
+* **Pesquisa Avançada:** CRUD completo e pesquisa paginada dinâmica via JPA Specifications.
+* **Arquitetura Orientada a Eventos:** Atua como Consumidor de Mensageria. Escuta a fila do broker para processar de forma assíncrona e resiliente a baixa ou reposição de estoque assim que um pedido muda de estado.
 
-3. ms-pedido
-   Responsável pela orquestração do fluxo de compras e transações.
+---
 
-Funcionalidades: Gerenciamento de estados do pedido (Recebido, Aprovado, Cancelado).
+##  2. Tecnologias Utilizadas
 
-Integração Síncrona: Utiliza OpenFeign para validação de dados de produtos no ms-produto.
+* **Core:** Java 25 & Spring Boot 4.x
+* **Segurança:** Spring Security, Spring Authorization Server (OAuth2 / OIDC 1.0, JWT, Nimbus JOSE + JWT)
+* **Comunicação e Roteamento:** Spring Cloud OpenFeign & Spring Cloud Gateway
+* **Service Discovery:** Netflix Eureka Server & Client
+* **Mensageria:** RabbitMQ (AMQP Protocol)
+* **Persistência de Dados:** Spring Data JPA & PostgreSQL (Bancos de dados isolados por serviço)
+* **Orquestração e Infraestrutura:** Docker & Docker Compose
+* **Mapeamento e Organização:** MapStruct & Lombok
+* **Garantia de Qualidade:** JUnit 5, Mockito & JaCoCo (81% de cobertura de testes na camada crítica de serviços)
 
-Integração Assíncrona: Publicação de eventos no RabbitMQ para processamento de baixa de estoque.
+---
 
-Camada de Validação: Implementação de validadores isolados seguindo o padrão Fail-Fast.
+##  3. Infraestrutura e Orquestração (Docker)
 
-4. ms-produto
-   Responsável pelo gerenciamento do catálogo de produtos e controle de estoque.
+Toda a infraestrutura do ecossistema foi conteinerizada para garantir paridade absoluta entre os ambientes de desenvolvimento e produção. Os segredos, credenciais e conexões do sistema são injetados dinamicamente nos contêineres através de um arquivo de configuração centralizado `.env`.
 
-Funcionalidades: CRUD completo e pesquisa paginada dinâmica via JPA Specifications.
+O ambiente utiliza uma rede externa dedicada do Docker (`ecommerce-net`), permitindo o isolamento completo do tráfego de dados sensíveis entre as bases do PostgreSQL, o Message Broker e as aplicações Java.
 
-Gerenciamento de Estoque: Lógica de negócio para atualização de saldo de produtos com validações de consistência.
+---
 
-Tecnologias Utilizadas
-Core: JDK 25 e Spring Boot 4.0.5.
+##  4. Como Executar o Ecossistema
 
-Comunicação: Spring Cloud OpenFeign e Spring Cloud Gateway.
+### Pré-requisitos
+* Possuir o **Docker** e o **Docker Compose** instalados na máquina.
+* Criar um arquivo `.env` na raiz do projeto com as credenciais de ambiente (Baseado no modelo `.env.example` disponível no repositório).
 
-Mensageria: RabbitMQ para arquitetura orientada a eventos.
+### Inicialização do Ambiente
+Graças à orquestração do Docker Compose, todo o ecossistema (bancos, broker, discovery, gateway e microsserviços) pode ser inicializado com um único comando no terminal:
 
-Persistência: Spring Data JPA com banco de dados H2 (em processo de migração para PostgreSQL).
+```bash
+# Clone o repositório
+git clone git@github.com:Wendell-Valentim/e-commerce.git
+cd e-commerce
 
-Mapeamento: MapStruct para conversão entre DTOs e Entidades.
-
-Garantia de Qualidade: JUnit 5, Mockito e JaCoCo.
-
-Documentação: Swagger/OpenAPI.
-
-Qualidade e Cobertura de Código
-A integridade do sistema é assegurada por testes unitários focados nas camadas de Service e Business Logic. Atualmente, o ms-pedido apresenta 81% de cobertura na camada de Service, garantindo a confiabilidade de fluxos críticos como cálculos de totais, validações de estoque e regras de cancelamento.
-
-Roadmap de Evolução
-Migração da persistência de dados para PostgreSQL.
-
-Implementação do ms-user com autenticação Spring Security e JWT.
-
-Implementação de Circuit Breaker para tolerância a falhas em chamadas externas.
-
-Instruções de Execução
-Certifique-se de possuir o JDK 25 e o RabbitMQ configurados.
-
-Inicialize os serviços na seguinte ordem:
-
-Discovery Server (Porta 8761).
-
-API Gateway (Porta 8080).
-
-ms-produto e ms-pedido.
-
-O acesso aos microserviços deve ser feito preferencialmente através da porta do API Gateway para garantir o roteamento correto.
-
-Painel de monitoramento Eureka disponível em: http://localhost:8761.
+# Inicie todo o ecossistema em segundo plano
+docker compose up -d --build
